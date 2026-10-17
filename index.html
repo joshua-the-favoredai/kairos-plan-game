@@ -1,0 +1,778 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F2EFE8">
+<meta name="robots" content="noindex, nofollow">
+<title>Kairos Plan Game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --linen: #F2EFE8; --ink: #16161A; --ember: #E23B2E; --ash: #6E6C66;
+  --slate: #2C3742; --rule: #DCD8CE; --card: #FAF8F3; --ok: #16161A; --tint: #F09A90;
+  --r: 14px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; padding: 0; background: var(--linen); color: var(--ink); }
+body {
+  font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px; line-height: 1.45; overflow-x: hidden;
+  -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+}
+button { font: inherit; color: inherit; }
+#app {
+  max-width: 480px; margin: 0 auto; min-height: 100vh; min-height: 100dvh;
+  display: flex; flex-direction: column;
+  padding: calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 16px);
+}
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; }
+.mark { font-weight: 700; font-size: 20px; letter-spacing: -0.03em; text-transform: lowercase; white-space: nowrap; }
+.mark .i { position: relative; display: inline-block; }
+.mark .i::before { content: ''; position: absolute; left: 50%; top: 0.05em; width: 0.26em; height: 0.26em; margin-left: -0.13em; border-radius: 50%; background: var(--ember); }
+.back { min-height: 44px; min-width: 44px; padding: 0 12px; border: 1px solid var(--rule); background: var(--card); border-radius: 999px; font-size: 15px; cursor: pointer; }
+.chip-me { min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--rule); background: var(--card); font-size: 14px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; }
+h1, h2, h3 { text-transform: lowercase; letter-spacing: -0.03em; line-height: 0.95; margin: 0; font-weight: 700; }
+h1 { font-size: 34px; }
+h2 { font-size: 26px; }
+h3 { font-size: 19px; line-height: 1.1; }
+.lab { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ash); margin: 0 0 6px; }
+.muted { color: var(--ash); }
+.dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--ember); flex: none; }
+.screen { flex: 1; display: flex; flex-direction: column; gap: 16px; padding-top: 12px; animation: in .25s ease; }
+@keyframes in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.card { background: var(--card); border: 1px solid var(--rule); border-radius: var(--r); padding: 18px; }
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;
+  min-height: 54px; padding: 12px 18px; border-radius: var(--r); border: 0;
+  background: var(--ember); color: #fff; font-weight: 600; font-size: 17px; cursor: pointer;
+  touch-action: manipulation; transition: transform .08s;
+}
+.btn:active { transform: scale(.98); }
+.btn.ghost { background: var(--card); color: var(--ink); border: 1px solid var(--rule); }
+.btn[disabled] { opacity: .4; }
+.row { display: flex; gap: 10px; }
+.row > * { flex: 1; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tile {
+  text-align: left; background: var(--card); border: 1px solid var(--rule); border-radius: var(--r);
+  padding: 14px; min-height: 96px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 8px;
+  touch-action: manipulation;
+}
+.tile:active { transform: scale(.98); }
+.tile b { font-size: 17px; letter-spacing: -0.02em; text-transform: lowercase; }
+.tile small { color: var(--ash); font-size: 13px; line-height: 1.3; }
+.tile.dark { background: var(--ember); color: #fff; border-color: var(--ember); }
+.tile.dark small { color: #FFE3DF; }
+.tile.dark .stars, .tile.dark .stars .off { color: #fff; }
+.av { width: 40px; height: 40px; border-radius: 50%; background: var(--slate); color: var(--linen); display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex: none; }
+.av.lg { width: 48px; height: 48px; font-size: 16px; }
+.stars { letter-spacing: 2px; font-size: 16px; color: var(--ember); white-space: nowrap; }
+.stars .off { color: var(--rule); }
+.tag { display: inline-block; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; background: var(--ember); color: #fff; border-radius: 999px; padding: 3px 9px; }
+
+/* map */
+.path { display: flex; flex-direction: column; gap: 0; position: relative; }
+.stop { display: flex; gap: 14px; align-items: stretch; }
+.stop .rail { width: 40px; display: flex; flex-direction: column; align-items: center; flex: none; }
+.stop .num { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--ink); display: flex; align-items: center; justify-content: center; font-weight: 700; background: var(--linen); }
+.stop .num { border-color: var(--ember); color: var(--ember); }
+.stop.done .num { background: var(--ember); color: #fff; }
+.stop .line { flex: 1; width: 2px; background: var(--rule); min-height: 14px; }
+.stop:last-child .line { display: none; }
+.stop button { flex: 1; text-align: left; margin-bottom: 12px; min-height: 76px; }
+
+/* progress */
+.prog { display: flex; gap: 4px; }
+.prog i { flex: 1; height: 5px; border-radius: 3px; background: var(--rule); }
+.prog i.on { background: var(--tint); }
+.prog i.cur { background: var(--ember); }
+.hud { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--ash); gap: 8px; }
+.hud b { color: var(--ink); }
+
+/* brief cards */
+.brief { min-height: 230px; display: flex; flex-direction: column; gap: 12px; justify-content: center; }
+.brief p { font-size: 19px; line-height: 1.4; margin: 0; }
+.src { font-size: 12px; color: var(--ash); letter-spacing: .08em; }
+
+/* mcq */
+.q { font-size: 21px; font-weight: 600; line-height: 1.25; letter-spacing: -0.01em; margin: 0; }
+.opts { display: flex; flex-direction: column; gap: 10px; }
+.opt {
+  text-align: left; width: 100%; min-height: 56px; padding: 13px 16px; border-radius: var(--r);
+  border: 1.5px solid var(--rule); background: var(--card); cursor: pointer; font-size: 16px; line-height: 1.3;
+  display: flex; gap: 12px; align-items: center; touch-action: manipulation;
+}
+.opt .k { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--rule); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; flex: none; color: var(--ash); }
+.opt.right { background: var(--ok); border-color: var(--ok); color: var(--linen); }
+.opt.right .k { border-color: var(--linen); color: var(--linen); }
+.opt.wrong { border-color: var(--ink); border-style: dashed; color: var(--ash); text-decoration: line-through; }
+.opt[disabled] { cursor: default; }
+.fb { border-left: 4px solid var(--ember); padding: 10px 14px; background: var(--card); border-radius: 0 var(--r) var(--r) 0; animation: in .2s ease; }
+.fb b { display: block; margin-bottom: 2px; }
+.shake { animation: shake .35s; }
+@keyframes shake { 20%,60% { transform: translateX(-6px); } 40%,80% { transform: translateX(6px); } }
+
+/* number catch */
+.field { position: relative; flex: 1; min-height: 360px; border-radius: var(--r); background: var(--ink); background-image: radial-gradient(circle at 50% 120%, rgba(226,59,46,.45), transparent 60%); overflow: hidden; touch-action: manipulation; }
+.bub {
+  position: absolute; left: 0; top: 0; height: 64px; border-radius: 32px; border: 0;
+  background: var(--linen); color: var(--ink); font-weight: 700; font-size: 16px; letter-spacing: -0.01em;
+  display: flex; align-items: center; justify-content: center; padding: 0 10px; cursor: pointer; will-change: transform;
+  box-shadow: 0 4px 0 var(--ember); white-space: nowrap;
+}
+.bub.x { background: transparent; color: #8A9099; box-shadow: none; border: 1.5px dashed #8A9099; text-decoration: line-through; }
+.bub.pop { animation: pop .35s forwards; }
+@keyframes pop { to { opacity: 0; scale: 1.5; } }
+.prompt { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; min-height: 48px; }
+.toast { position: absolute; left: 12px; right: 12px; bottom: 12px; background: var(--linen); color: var(--ink); border-radius: 12px; padding: 10px 14px; font-size: 15px; animation: in .2s ease; z-index: 3; }
+
+/* sort */
+.sortcard { min-height: 150px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 20px; font-weight: 600; line-height: 1.3; animation: drop .3s ease; }
+@keyframes drop { from { transform: translateY(-30px); opacity: 0; } to { transform: none; opacity: 1; } }
+.timer { height: 6px; border-radius: 3px; background: var(--rule); overflow: hidden; }
+.timer i { display: block; height: 100%; background: var(--ember); transform-origin: left; }
+.bins { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+.bin { min-height: 72px; border-radius: var(--r); border: 2px solid var(--ember); background: var(--card); font-weight: 700; font-size: 16px; text-transform: lowercase; cursor: pointer; touch-action: manipulation; }
+.bin.right { background: var(--ok); color: var(--linen); border-color: var(--ok); }
+.bin.wrong { border-style: dashed; color: var(--ash); }
+
+/* match */
+.match { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.match .col { display: flex; flex-direction: column; gap: 10px; }
+.mt { min-height: 64px; padding: 10px; border-radius: var(--r); border: 1.5px solid var(--rule); background: var(--card); font-size: 14px; line-height: 1.25; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 8px; touch-action: manipulation; overflow-wrap: anywhere; }
+.mt .av { width: 32px; height: 32px; font-size: 12px; }
+.mt.sel { border-color: var(--ember); box-shadow: inset 0 0 0 1.5px var(--ember); background: #FDECEA; }
+.mt.done { background: var(--ok); border-color: var(--ok); color: var(--linen); opacity: .9; }
+.mt.done .av { background: var(--linen); color: var(--slate); }
+
+/* order */
+.chain { display: flex; flex-direction: column; gap: 8px; }
+.link { display: flex; gap: 12px; align-items: flex-start; background: var(--ok); color: var(--linen); border-radius: var(--r); padding: 12px 14px; animation: in .25s ease; }
+.link .n { font-weight: 700; font-size: 18px; min-width: 22px; color: var(--ember); }
+.link small { display: block; color: #C9CCD0; font-size: 13px; line-height: 1.3; margin-top: 2px; }
+.pool { display: flex; flex-direction: column; gap: 10px; }
+
+/* quote */
+.plist { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pi { border: 1px solid var(--rule); background: var(--card); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+.pi .nm { font-size: 13px; line-height: 1.25; min-height: 32px; }
+.pi .pr { font-weight: 700; font-size: 15px; }
+.step { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.step button { width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--ember); color: var(--ember); background: var(--linen); font-size: 22px; line-height: 1; cursor: pointer; touch-action: manipulation; }
+.step span { font-weight: 700; min-width: 24px; text-align: center; }
+.total { position: sticky; bottom: 0; background: var(--linen); padding: 10px 0 0; display: flex; flex-direction: column; gap: 10px; }
+.total .amt { color: var(--ember); font-size: 30px; font-weight: 700; letter-spacing: -0.03em; }
+
+/* hot seat */
+.panel { display: flex; justify-content: center; gap: 14px; align-items: flex-end; }
+.pv { width: 54px; display: flex; flex-direction: column; align-items: center; }
+.pv svg { display: block; }
+.ring { position: relative; width: 64px; height: 64px; flex: none; }
+.ring svg { transform: rotate(-90deg); }
+.ring span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+.meter { height: 10px; border-radius: 5px; background: var(--rule); overflow: hidden; }
+.meter i { display: block; height: 100%; background: var(--ember); transition: width .4s ease; }
+
+/* results */
+.big { color: var(--ember); font-size: 64px; font-weight: 700; letter-spacing: -0.04em; line-height: 1; }
+.bigstars { font-size: 40px; letter-spacing: 6px; }
+.bar { display: grid; grid-template-columns: 74px 1fr 46px; gap: 10px; align-items: center; font-size: 14px; }
+.bar .tr { height: 14px; background: var(--rule); border-radius: 7px; overflow: hidden; }
+.bar .tr i { display: block; height: 100%; background: var(--ember); }
+.miss { border-top: 1px solid var(--rule); padding: 12px 0; font-size: 15px; }
+.miss:first-child { border-top: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--rule); background: var(--card); font-size: 14px; cursor: pointer; touch-action: manipulation; }
+.chip.on { background: var(--ember); color: #fff; border-color: var(--ember); }
+.switch { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; }
+.switch input { width: 26px; height: 26px; accent-color: var(--ember); }
+.confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 10; }
+.confetti i { position: absolute; top: -12px; width: 10px; height: 10px; border-radius: 50%; animation: fall 1.6s ease-in forwards; }
+@keyframes fall { to { transform: translateY(105vh) rotate(360deg); opacity: .6; } }
+.spacer { flex: 1; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* hero, in the brand's cover style: ink ground, ember accent */
+.hero { background: var(--ink); color: var(--linen); border-radius: var(--r); padding: 22px 20px; position: relative; overflow: hidden; }
+.hero::after { content: ''; position: absolute; right: -40px; bottom: -40px; width: 140px; height: 140px; border-radius: 50%; background: var(--ember); opacity: .9; }
+.hero h1 { position: relative; z-index: 1; }
+.hero em { font-style: normal; color: var(--ember); }
+.hero p { position: relative; z-index: 1; margin: 10px 0 0; color: #C9C6BF; font-size: 15px; max-width: 75%; }
+.opt:active, .tile:active, .bin:active { border-color: var(--ember); }
+.av.me { background: var(--ember); }
+
+</style>
+</head>
+<body>
+<div id="app"><noscript>This game needs JavaScript. Open the file in Chrome or Safari.</noscript></div>
+<script>window.onerror = function (m, s, l) { var a = document.getElementById('app'); if (a) a.innerHTML = '<p style="padding:16px;font-family:sans-serif">Something went wrong: ' + String(m).replace(/</g, '&lt;') + ' (line ' + l + '). Please send Joshua a screenshot.</p>'; };</script>
+<script>window.GAME_DATA = {"weights":[5,10,5,10,10,5,15,10],"founders":[{"name":"Keanan Reed","ini":"KR","role":"Chief Revenue Officer","share":"13%","part":1},{"name":"Joshua Reed","ini":"JR","role":"Chief Executive Officer · Automation & Technology","share":"12%","part":2},{"name":"Koketso Mashele","ini":"KM","role":"Operations Support","share":"13%","part":3},{"name":"Marco Pona","ini":"MP","role":"Chief Compliance & Risk Officer","share":"12%","part":4},{"name":"Kundai Benhura","ini":"KB","role":"Marketing & Sales Lead","share":"13%","part":5},{"name":"Jaylon Pillay","ini":"JP","role":"Client Success Lead","share":"12%","part":6},{"name":"Siphamandla Kunene","ini":"SK","role":"Chief Financial Officer","share":"12%","part":7},{"name":"Francine Munava","ini":"FM","role":"Chief Operating Officer","share":"13%","part":8}],"parts":[{"n":1,"title":"executive summary","presenter":"Keanan Reed","minutes":4,"lede":"Why Kairos AI exists, how it works, and what it commits to.","handover":"The summary makes the claims: a real need, open churches, no one serving them. Part 2 proves them with research.","brief":[{"h":"why we exist","t":"Churches carry more operational work than their people have hours for. Visitor follow-up, member communication and attendance sit upstream of church income.","src":"1.1"},{"h":"the name","t":"Kairós is Greek for the appointed moment, against chronos, the clock running down. Our work is to give that time back.","src":"1.1"},{"h":"three services","t":"Train, automate, partner: AI Education & Upskilling, Low-Code Automation Builds, Strategic AI Partnership. Prices are published and set by complexity, never church size.","src":"1.1"},{"h":"funding","t":"R 40,000 of founder share capital: R 5,200 from each 13% founder and R 4,800 from each 12% founder, paid by 28 February 2027. No debt, no outside equity.","src":"1.1"},{"h":"year 1 goals","t":"20 workshops, 8 builds (first in June 2027), 5 retainer clients, monthly recurring revenue above R 40,000, revenue R 581,095 and net profit R 288,165.","src":"1.3"},{"h":"vision and mission","t":"A future where houses of worship operate with the excellence of modern technology. Less admin. More ministry.","src":"1.2"}],"quiz":[{"q":"What does 'Kairos' mean?","a":["The appointed moment","The clock running down","Faithful service","New beginnings"],"c":0,"why":"Kairós is Greek for the appointed moment. It stands against chronos, the clock running down.","src":"1.1"},{"q":"When does Kairos AI begin trading?","a":["1 March 2027","1 January 2027","17 August 2026","1 March 2028"],"c":0,"why":"Trading begins on 1 March 2027. Year 1 runs March 2027 to February 2028.","src":"1.1"},{"q":"How is pricing set across all three service lines?","a":["By the complexity of the work","By the size of the church","By what the church can afford","By the number of workflows"],"c":0,"why":"Prices are standardised, published and set by complexity, never by the size of the church.","src":"1.1"},{"q":"Which month is the first automation build signed?","a":["June 2027 (month 4)","March 2027 (month 1)","October 2027 (month 8)","February 2028 (month 12)"],"c":0,"why":"SMART goal 3: first automation build signed in June 2027, month 4, after the demonstration phase.","src":"1.3"},{"q":"Which bank does Kairos AI use?","a":["Capitec Business","FNB Business","Standard Bank","Nedbank"],"c":0,"why":"Kairos AI banks with Capitec Business. Transactions above R 5,000 need two directors.","src":"1.1"},{"q":"Phase 2 extends to medium-sized congregations from…","a":["March 2028","March 2027","June 2027","March 2030"],"c":0,"why":"Phase 2 begins in March 2028, the first month of Year 2.","src":"1.1"},{"q":"Where does Kairos AI plan to expand in Years 4 to 5?","a":["The United States, then the rest of Africa","Europe, then Asia","The rest of Africa only","Nowhere outside Gauteng"],"c":0,"why":"Long term: the US first, following church networks, then the rest of Africa.","src":"1.1"},{"q":"What is the positioning line?","a":["Less admin. More ministry.","Faith meets future.","Automate everything.","Smart churches, strong churches."],"c":0,"why":"The mission closes with: Less admin. More ministry.","src":"1.2"}],"figures":[{"p":"Year 1 revenue","v":"R 581,095","d":["R 535,335","R 394,746","R 288,165"],"src":"1.3"},{"p":"Year 1 net profit after tax","v":"R 288,165","d":["R 394,746","R 581,095","R 279,608"],"src":"1.3"},{"p":"Training workshops in Year 1","v":"20","d":["8","36","12"],"src":"1.3"},{"p":"Automation builds signed in Year 1","v":"8","d":["5","20","16"],"src":"1.3"},{"p":"Active retainer clients by end of Year 1","v":"5","d":["8","10","2"],"src":"1.3"},{"p":"Founder share capital","v":"R 40,000","d":["R 50,000","R 38,000","R 10,000"],"src":"1.1"},{"p":"Year 2 revenue","v":"R 2,354,927","d":["R 4,723,994","R 1,727,754","R 808,928"],"src":"1.3"},{"p":"Year 3 revenue","v":"R 4,723,994","d":["R 2,354,927","R 2,824,247","R 1,578,254"],"src":"1.3"}],"games":[{"type":"catch"}],"panel":[{"q":"Volunteers do church admin for free. Why would a church pay you?","a":["Because the tasks under strain sit upstream of church income: we protect retained visitors, members and giving","Because automation is cheaper than hiring staff, so the church saves on salaries every month","Because AI frees volunteers to serve elsewhere, which grows the church's ministry reach"],"c":0,"why":"The plan rejects the cost-saving argument as weak in a church. Value is revenue protection.","src":"5.1"},{"q":"How do you know the Year 1 goals are achievable?","a":["Every figure comes from the Part 7 model, and fixed costs are covered by just 2 retainer clients","We tested demand in the survey, where 34 of 41 churches committed to buying our services","Comparable SA agencies reached similar revenue in their first year, so we used their results"],"c":0,"why":"All SMART goals come from the financial model. Break-even needs 2 retainer clients.","src":"7.2.1"},{"q":"Who funds the business, and is there debt?","a":["The eight founders, R 40,000 of share capital, with no debt and no outside equity","The founders put in R 40,000 and a small Capitec overdraft covers the low point in month 6","The founders pay in R 5,000 each, and Bible College networks provide a start-up grant"],"c":0,"why":"Founders fund it in proportion to their shareholding. No debt and no outside equity.","src":"1.1"}],"handq":{"q":"What does Part 1 hand to Part 2?","a":["Claims about need and opportunity that Part 2 must prove with research","The final price list","The company's legal registration"],"c":0,"why":"The summary states the case. Part 2's research supports it."}},{"n":2,"title":"market research & analysis","presenter":"Joshua Reed","minutes":6,"lede":"What 41 church respondents told us, who else is out there, and where the law draws the lines.","handover":"The research shows who needs us and that nobody serves them. Part 3 describes the company built to serve them.","brief":[{"h":"the survey","t":"41 respondents, 18 May to 21 September 2026, twelve questions: Ministry Operations & AI. 29 of 41 lead or administer church operations.","src":"2.1"},{"h":"no one is positioned","t":"SA AI agencies serve commercial clients. Zapier, Make and n8n need technical skill. Large IT firms are priced for corporates. Church software sells software, not automation or training.","src":"2.1a"},{"h":"open, but untried","t":"18 of 41 organisations have not considered AI. Only 5 use it actively. 21 of 41 have never used an AI tool. Yet 34 of 41 said yes to training or were open to it.","src":"2.1b"},{"h":"the weekly strain","t":"Most time: member communication 25, attendance 17, visitor follow-up 15. Most often late: visitor follow-up 14, attendance 13.","src":"2.1b"},{"h":"the industry","t":"85.3% of South Africans identified as Christian (Census 2022). 35,155 Religion-sector NPOs, 13,254 in Gauteng. About 94% of SA internet users are on WhatsApp.","src":"2.1c"},{"h":"the law","t":"POPIA is the main restriction. The church is the responsible party; Kairos AI is its operator. Religious belief is special personal information. SA has no AI-specific law.","src":"2.3"}],"quiz":[{"q":"How many people responded to the survey?","a":["41","16","29","100"],"c":0,"why":"41 church leaders, staff and volunteers, 18 May to 21 September 2026.","src":"2.1"},{"q":"Which task takes the most time each week?","a":["Member communication","Visitor follow-up","Giving records","Social media posting"],"c":0,"why":"Member communication: 25 of 41 (61%).","src":"2.1b"},{"q":"Which task is most often done inconsistently or late?","a":["Visitor follow-up","Member communication","Giving records","Attendance tracking"],"c":0,"why":"Visitor follow-up: 14 of 41. Attendance is close behind at 13.","src":"2.1b"},{"q":"What is the most common concern about AI in ministry?","a":["Losing the personal, relational touch","Cost","Not knowing where to start","Job losses"],"c":0,"why":"19 of 41 (46%). Privacy is second at 15 and cost third at 8.","src":"2.1b"},{"q":"Why do self-service platforms like Zapier, Make and n8n fall short for a church?","a":["They need technical knowledge most administrators lack","They are too expensive","They are not available in South Africa","They cannot connect to WhatsApp"],"c":0,"why":"Capable and cheap, but they need technical skill and give no church-specific guidance.","src":"2.1a"},{"q":"Under POPIA, what role does Kairos AI play?","a":["Operator, for the church as responsible party","Responsible party","Information Regulator","Data subject"],"c":0,"why":"The church is the responsible party. Kairos AI processes data as its operator under a written contract.","src":"2.3"},{"q":"What happened to South Africa's Draft National AI Policy?","a":["Withdrawn on 26 April 2026","Passed into law in 2026","It never existed","Took effect on 1 March 2027"],"c":0,"why":"Withdrawn on 26 April 2026. A replacement is due by March 2027.","src":"2.3"},{"q":"Which POPIA section lets religious organisations process their own members' religious information?","a":["Section 28","Section 72","Section 69","Section 20"],"c":0,"why":"Section 26 prohibits processing special information unless an exception applies. Section 28 is that exception for religious organisations.","src":"2.3"},{"q":"Large churches are the readiest buyers because…","a":["9 of the 16 large-church respondents already use AI informally or actively","They have the most volunteers","They asked for the lowest prices","They are all in Gauteng"],"c":0,"why":"Large churches are further along: 9 of 16 report informal or active use.","src":"2.1b"}],"figures":[{"p":"Organisations that have not considered AI","v":"18 of 41","d":["5 of 41","34 of 41","21 of 41"],"src":"2.1b"},{"p":"Organisations using AI actively","v":"5 of 41","d":["18 of 41","11 of 41","16 of 41"],"src":"2.1b"},{"p":"Said yes to training, or open to it","v":"34 of 41","d":["17 of 41","21 of 41","29 of 41"],"src":"2.1b"},{"p":"Respondents who never used an AI tool","v":"21 of 41","d":["18 of 41","10 of 41","4 of 41"],"src":"2.1b"},{"p":"South Africans identifying as Christian, Census 2022","v":"85.3%","d":["79.6%","94%","61%"],"src":"2.1c"},{"p":"SA internet users on WhatsApp","v":"94%","d":["85.3%","79.6%","61%"],"src":"2.1c"}],"games":[{"type":"sort","title":"swot sorter","bins":["strength","weakness","opportunity","threat"],"items":[{"t":"Deep church-sector knowledge and relationships","b":0},{"t":"Low overhead and remote-first structure","b":0},{"t":"Founded from Bible College, with credibility","b":0},{"t":"No client track record yet","b":1},{"t":"Pricing is new to this market","b":1},{"t":"Large, part-time founding team","b":1},{"t":"18 of 41 have not considered AI","b":2},{"t":"34 of 41 open to training","b":2},{"t":"Church networks drive referrals","b":2},{"t":"Church budgets tighten","b":3},{"t":"SA AI agencies turn to churches","b":3},{"t":"AI tools change quickly","b":3}],"src":"2.2"}],"panel":[{"q":"Only 41 people answered your survey. Is that enough to build a business on?","a":["It is direct evidence from inside our target market. Most answers come from people who run church operations, the large-church group shows the same order, and desk research backs it","Yes. 41 responses is statistically representative of South Africa's 35,155 religious organisations","It is a starting point only. We will run a larger survey before launch to confirm the demand"],"c":0,"why":"Do not overclaim. 29 of 41 lead or administer operations, and the 16 large-church respondents rank the tasks in the same order.","src":"2.1b"},{"q":"Why can't a church just use n8n or Zapier itself?","a":["They need technical knowledge most church administrators do not have, and give no church-specific guidance","It can, but those platforms charge in dollars, so we resell them at a lower rand price","Those platforms don't integrate with WhatsApp, which is the channel churches depend on"],"c":0,"why":"This is the competitor analysis for self-service platforms.","src":"2.1a"},{"q":"Member data shows religious belief. How can you legally process it?","a":["As the church's operator under a written agreement. Section 28 lets religious bodies process their members' data, and the church holds consent","We anonymise every record first, so POPIA's special-information rules no longer apply to us","Churches are NPOs, so the Nonprofit Organisations Act lets us process their member data freely"],"c":0,"why":"Religious belief is special personal information (section 26). Section 28 provides the exception for religious organisations.","src":"2.3"},{"q":"What stops an established AI agency entering the church market?","a":["Our reference churches and a library of church-specific templates they don't have","Our published prices are lower than any agency's, so they cannot compete with us on cost","The Constitution gives us exclusive rights to serve the churches in our founders' networks"],"c":0,"why":"SWOT mitigation for the threat 'agencies enter the church sector'.","src":"2.2"}],"handq":{"q":"What does Part 2 hand to Part 3?","a":["Evidence of an unserved need, which Part 3 answers by describing the company built to meet it","The final financial statements","The founders' CVs"],"c":0,"why":"Research shows the need. The entity description shows who meets it."}},{"n":3,"title":"entity description","presenter":"Koketso Mashele","minutes":4,"lede":"Who we serve, how the company is set up, and what makes it hard to copy.","handover":"The company, its clients and its owners are defined. Part 4 shows who runs it and how decisions are made.","brief":[{"h":"phase 1 client","t":"Large Charismatic and Pentecostal churches with 1,501+ active members OR 25+ paid staff. Both together is the priority.","src":"3.1b"},{"h":"why large first","t":"They have the operating income to invest, and their own training rooms, screens and power, so workshops need no venue hire.","src":"3.1b"},{"h":"where","t":"Johannesburg area. Registered address 7 Pretoria Road, Morehill, Benoni. No premises: remote-first, workshops at the client church or online.","src":"3.1c"},{"h":"legal form","t":"Private, for-profit Pty Ltd under the Companies Act 71 of 2008. Not an NPO or PBO. Registered with CIPC; numbers awaiting issue.","src":"3.2"},{"h":"ownership","t":"1,000 ordinary shares, R 40 a share. Four founders hold 13% (130 shares), four hold 12% (120 shares): a B-BBEE adjusted allocation.","src":"3.2"},{"h":"hard to copy","t":"Founders are part of the sector, trust travels by referral, one provider for the whole journey, and church-specific templates on a low cost base.","src":"3.3"}],"quiz":[{"q":"A church qualifies for Phase 1 when it has…","a":["1,501+ active members OR 25+ paid staff","500+ members AND 10+ staff","Any number of members in Gauteng","3,000+ members only"],"c":0,"why":"Either one qualifies. Churches meeting both are the priority.","src":"3.1b"},{"q":"Which tradition does Phase 1 target?","a":["Charismatic and Pentecostal","Reformed","Anglican","Roman Catholic"],"c":0,"why":"The tradition the founders belong to and know.","src":"3.1b"},{"q":"What legal form is Kairos AI?","a":["Private for-profit company, Pty Ltd","NPO","PBO","Sole proprietorship"],"c":0,"why":"A commercial company that serves churches, under the Companies Act 71 of 2008.","src":"3.2"},{"q":"What is the share split?","a":["Four founders at 13% and four at 12%","Eight founders at 12.5% each","CEO 30%, others 10%","Four at 15% and four at 10%"],"c":0,"why":"130 or 120 of 1,000 shares each. The 12.5% in the signed Constitution is corrected by the amendment resolution.","src":"3.2"},{"q":"Why do some founders hold 13% instead of 12%?","a":["It is a B-BBEE adjusted allocation","They paid in more cash first","They joined earlier","They work full time"],"c":0,"why":"Black founders hold a marginally higher share, to strengthen the B-BBEE ownership score.","src":"3.2"},{"q":"How long do the remaining directors have to accept shares offered under the right of first refusal?","a":["30 days","7 days","90 days","There is no such right"],"c":0,"why":"Constitution Article 2.3: 30 days. A resigning director also gives 30 days' notice.","src":"3.2"},{"q":"Which is NOT one of the five core values?","a":["Growth at all costs","Stewardship","Integrity","Innovation"],"c":0,"why":"The five values are stewardship, excellence, Kingdom-mindedness, integrity and innovation.","src":"3.1d"},{"q":"Where are training workshops delivered?","a":["In the client church's own training room, or online","At Kairos AI's office","At a hired conference venue","Only online"],"c":0,"why":"Kairos AI has no premises. Consulting and builds are remote-first; workshops are in person at the church or online.","src":"3.1c"},{"q":"How does Kairos AI frame its value, unlike other providers?","a":["As protection of the church's income base","As a cost saving","As a technology upgrade","As a compliance requirement"],"c":0,"why":"Others sell automation as a cost saving. Kairos AI sells protection of income.","src":"3.3"}],"figures":[{"p":"Phase 1: minimum active members","v":"1,501","d":["500","3,000","1,000"],"src":"3.1b"},{"p":"Phase 1: minimum paid staff","v":"25","d":["10","50","15"],"src":"3.1b"},{"p":"Ordinary shares in issue","v":"1,000","d":["100","800","10,000"],"src":"3.2"},{"p":"Price per share","v":"R 40","d":["R 1","R 100","R 400"],"src":"3.2"}],"games":[{"type":"sort","title":"13% or 12%?","bins":["13%","12%"],"items":[{"t":"Keanan Reed","b":0},{"t":"Joshua Reed","b":1},{"t":"Koketso Mashele","b":0},{"t":"Marco Pona","b":1},{"t":"Kundai Benhura","b":0},{"t":"Jaylon Pillay","b":1},{"t":"Siphamandla Kunene","b":1},{"t":"Francine Munava","b":0}],"src":"3.2"}],"panel":[{"q":"Why a Pty Ltd and not an NPO, when you serve churches?","a":["It's a commercial company: it separates liability, contracts in its own name, allows future equity, and lets founders earn a return, which an NPO can't","An NPO cannot work with churches, so a Pty Ltd was the only structure CIPC would register","A Pty Ltd pays less tax than an NPO and qualifies for small business corporation relief"],"c":0,"why":"This is the rationale for the Pty Ltd structure.","src":"3.2"},{"q":"Why start with large churches only?","a":["They have the operating income to invest and their own training rooms, and 15 of 16 large-church respondents have 50+ paid staff","Small churches told us in the survey they are not interested in AI or automation at all","Large churches are all in Gauteng, so we avoid travel costs during the launch phase"],"c":0,"why":"Income to invest, and lower delivery cost because no venue hire is needed.","src":"3.1b"},{"q":"What makes your position hard to copy?","a":["Founders inside the sector, a referral network, one provider for train-automate-partner, and church templates on a low cost base","Our n8n platform is proprietary, and we hold exclusive rights to Claude in the church sector","We are the cheapest provider in the market, and our prices are fixed for three years"],"c":0,"why":"These are the four points in the competitive advantage.","src":"3.3"}],"handq":{"q":"What does Part 3 hand to Part 4?","a":["A defined company and owners, so Part 4 can show who runs it and how decisions are made","The survey results","The marketing channels"],"c":0,"why":"Entity first, then the organisation that runs it."}},{"n":4,"title":"organisation & management","presenter":"Marco Pona","minutes":5,"lede":"Who does what, how we decide, and what could go wrong inside the company.","handover":"The team, governance and risks are in place. Part 5 shows how that team wins clients.","brief":[{"h":"the structure","t":"Eight founders: each a director, shareholder and owner of one function. The CEO, Joshua Reed, leads the executive team.","src":"4.1"},{"h":"committees","t":"Leadership Committee: all eight, monthly. Financial Committee: the CFO and Nancy Ngobeni CA(SA), quarterly.","src":"4.3"},{"h":"advisory panel","t":"Pro bono, no equity, no vote: Pastor Evert Boshoff (Ministry), Nancy Ngobeni CA(SA), Lukhwareni Lucky (Attorney), Calvin Munava (Technology).","src":"4.2"},{"h":"decisions","t":"Ordinary 5 of 8. Special 6 of 8 (new shareholders, amending the Constitution). Unanimous 8 of 8 (winding up). Quorum 5.","src":"4.3"},{"h":"controls","t":"Over R 5,000 needs two directors. No contract over R 10,000, debt or self-payment without the board.","src":"4.3"},{"h":"hiring by workload","t":"A developer once retainers exceed 10, a coordinator once clients exceed 25, a sales rep once MRR passes R 150,000. 2 staff by end of Year 2, 4 by Year 3.","src":"4.1"}],"quiz":[{"q":"What vote does an ordinary resolution need?","a":["5 of 8","6 of 8","8 of 8","4 of 8"],"c":0,"why":"A simple majority: 5 of 8.","src":"4.3"},{"q":"Amending the Constitution needs…","a":["A special resolution, 6 of 8","An ordinary resolution, 5 of 8","A unanimous resolution","The CEO alone"],"c":0,"why":"Special resolution, 75%: admitting shareholders and amending the Constitution.","src":"4.3"},{"q":"Who sits on the Financial Committee?","a":["The CFO and Nancy Ngobeni CA(SA)","All eight founders","The CEO and the attorney","The CFO alone"],"c":0,"why":"Siphamandla Kunene and Nancy Ngobeni, CA(SA), pro bono. It meets quarterly.","src":"4.2"},{"q":"Why is the Technology Advisor not the CEO?","a":["The seat exists for independent review, and you cannot review your own work","The CEO is too busy","It is a legal requirement","The CEO has no technical skill"],"c":0,"why":"A review of one's own work is not a review.","src":"4.2"},{"q":"What is the quorum for a board meeting?","a":["5 of 8","4 of 8","8 of 8","3 of 8"],"c":0,"why":"If no quorum within 30 minutes, the meeting is held again within seven days.","src":"4.3"},{"q":"Transactions above what amount need two directors?","a":["R 5,000","R 10,000","R 1,000","R 40,000"],"c":0,"why":"Every transaction above R 5,000 needs two directors' authorisation.","src":"4.3"},{"q":"When is the AGM held?","a":["By 31 August each year","In March each year","Every quarter","Only when called"],"c":0,"why":"The financial year ends in February. The AGM is by 31 August, with 15 business days' notice.","src":"4.3"},{"q":"What mitigates key-person dependency on the CEO?","a":["Documented workflows, cross-training, and an automation developer as the first Year 2 hire","Hiring a second CEO","Outsourcing all builds","Insurance only"],"c":0,"why":"This is internal risk 1 in the register.","src":"4.4"},{"q":"How fast is a client told of a data breach?","a":["Within 72 hours","Within 30 days","At the next quarterly review","Only if asked"],"c":0,"why":"Data handling error mitigation: breach notification to the client within 72 hours.","src":"4.4"}],"figures":[{"p":"Votes for a special resolution","v":"6 of 8","d":["5 of 8","8 of 8","4 of 8"],"src":"4.3"},{"p":"MRR that triggers a sales rep hire","v":"R 150,000","d":["R 40,000","R 100,000","R 200,000"],"src":"4.1"},{"p":"Staff (excluding founders) at end of Year 2","v":"2","d":["4","0","8"],"src":"4.1"},{"p":"Contract value that needs board approval","v":"R 10,000","d":["R 5,000","R 40,000","R 1,000"],"src":"4.3"}],"games":[{"type":"match","title":"who does what","mode":"role","src":"4.2.a"}],"panel":[{"q":"Eight part-time founders: how will decisions not stall?","a":["One accountable owner per function, monthly minuted Leadership Committee meetings, quorum of 5, ordinary matters by 5 of 8","The CEO decides operational matters alone, and the board only meets at the annual general meeting","Every decision needs all eight founders to agree, so nothing moves without full consensus"],"c":0,"why":"Mitigation for the part-time team and coordination-overhead risks.","src":"4.4"},{"q":"Who checks your finances independently?","a":["Nancy Ngobeni CA(SA) on the Financial Committee reviews the books quarterly","An external auditor audits the annual financial statements, as the Companies Act requires","The Advisory Panel's attorney reviews the books and signs off the tax returns each year"],"c":0,"why":"The law exempts the company from audit and review (s30(2A)), but the Constitution adds an independent CA anyway.","src":"4.2"},{"q":"What if founders disagree on equity or direction?","a":["The Constitution sets shareholding, decision rights, first refusal on transfers and 30 days' notice","The Co-Founders Agreement sets out a mediation process, run by the attorney on the panel","The CEO holds a casting vote on any deadlock between the founders, under the Constitution"],"c":0,"why":"The plan cites only the signed Constitution. The Co-Founders Agreement was dropped.","src":"4.4"}],"handq":{"q":"What does Part 4 hand to Part 5?","a":["A team with clear roles and governance, ready to go and win clients","The survey questionnaire","The balance sheet"],"c":0,"why":"Organisation first, then how it sells."}},{"n":5,"title":"marketing & sales strategies","presenter":"Kundai Benhura","minutes":6,"lede":"We demonstrate first. Demand follows understanding.","handover":"Marketing promises outcomes. Part 6 details the services and prices that deliver them.","brief":[{"h":"evangelistic first","t":"Most churches cannot say what they need because they don't know what is possible. So we demonstrate first, and demand follows understanding.","src":"5.1"},{"h":"price","t":"Published, standard prices set by complexity, never church size. Justified by revenue protection, not cost saving.","src":"5.1"},{"h":"place","t":"Channels in order: direct relationship sales, Bible College network, church network partnerships, demonstration-led inbound.","src":"5.1"},{"h":"launch steps","t":"Mar–May 2027: demonstration and pilot. Jun–Oct 2027: training-led entry. Nov 2027–Feb 2028: network partnerships.","src":"5.2"},{"h":"the sales cycle","t":"Four stages, 14 to 22 working days: free consultation, written offer, decision, signed agreement. Targets: 5 consultations and 3 offers a month.","src":"5.2"},{"h":"seven barriers","t":"The one that matters most: churches don't yet know what AI can do for them. The answer: teach first, build second.","src":"5.3"}],"quiz":[{"q":"Why is Kairos AI's marketing 'evangelistic before commercial'?","a":["Churches cannot ask for what they do not yet know is possible","It is a church market, so we preach","Paid ads are too expensive","It is a legal requirement"],"c":0,"why":"18 of 41 had not considered AI, so a conventional brief would be poor.","src":"5.1"},{"q":"How long is the sales cycle from first contact to signed agreement?","a":["14–22 working days","3–5 working days","60–90 days","6 months"],"c":0,"why":"Four stages. Each is 3–5 days, except consultation to offer at 5–7.","src":"5.2"},{"q":"Why is the first consultation free?","a":["A church cannot brief us until it has seen what is possible","To beat competitor prices","Because it is short","It is required by law"],"c":0,"why":"Further consultations before commitment carry a small fee, which keeps the process moving.","src":"5.2"},{"q":"What is the referral reward?","a":["10% off the next workshop per referred church that signs","R 1,000 cash","A free build","One month's free retainer"],"c":0,"why":"This is the referral programme in the promotion plan.","src":"5.1"},{"q":"What is Kairos AI's Year 1 primary channel?","a":["Direct relationship sales by founders","Paid Google ads","Cold calling","A sales representative"],"c":0,"why":"A sales representative comes only from Year 3.","src":"5.1"},{"q":"Who leads sales in Year 1?","a":["Keanan Reed, Chief Revenue Officer","Kundai Benhura alone","An external sales team","Joshua Reed"],"c":0,"why":"The CRO leads. The Marketing & Sales Lead generates demand, and the Client Success Lead takes over after signing.","src":"5.2"},{"q":"How does Kairos AI answer the 'loss of personal touch' objection?","a":["Automations route people to people, e.g. alert a pastor to call a member absent three weeks","AI messages sound human","We avoid messaging members","Churches get used to it"],"c":0,"why":"The aim is to make sure pastoral contact actually happens.","src":"5.2"},{"q":"What does 'scrubbing the list' check first?","a":["The church meets the Phase 1 criteria","The church's denomination","The pastor's age","The church's social media following"],"c":0,"why":"Also: decision-maker named, contacts current, duplicates removed.","src":"5.2"},{"q":"Which barrier matters most?","a":["Churches do not yet know what AI can do for them","Cost","Platform dependence","Part-time team"],"c":0,"why":"A market that doesn't know what to ask for can't be reached by conventional selling.","src":"5.3"}],"figures":[{"p":"Free consultations targeted per month","v":"5","d":["3","10","20"],"src":"5.2"},{"p":"Written offers targeted per month","v":"3","d":["5","8","1"],"src":"5.2"},{"p":"Average build fee","v":"R 32,850","d":["R 32,000","R 18,000","R 75,000"],"src":"5.2"},{"p":"Average monthly retainer","v":"R 7,025","d":["R 7,500","R 3,500","R 9,025"],"src":"5.2"}],"games":[{"type":"order","title":"the sales cycle","items":["First contact to free consultation","Consultation to written offer","Offer to decision","Decision to signed agreement"],"notes":["3–5 working days","5–7 working days","3–5 working days","3–5 working days"],"src":"5.2"},{"type":"order","title":"the launch steps","items":["Demonstration & pilot","Training-led entry","Network partnerships"],"notes":["March to May 2027","June to October 2027","November 2027 to February 2028"],"src":"5.2"}],"panel":[{"q":"You have no track record. How do you win the first client?","a":["First engagements on preferential terms in exchange for written and video testimonials, opened by a free consultation and workshops","We launch with paid Facebook and Google advertising aimed at church administrators nationwide","We price 50% below every competitor until enough churches have signed with us"],"c":0,"why":"This is barrier 4's response. Reference churches are built before the wider market.","src":"5.3"},{"q":"Won't automated messages make a church feel impersonal?","a":["Generic broadcasts do. Our automations personalise and route people to people, alerting a pastor to call","Messages are written by AI to sound human, so members will not notice they are automated","We only automate admin tasks, so members never receive any automated messages from us"],"c":0,"why":"The objective is that pastoral contact actually happens.","src":"5.2"},{"q":"Why don't you charge bigger churches more?","a":["Churches talk to each other. Pricing by size would damage trust, so price follows complexity","Larger churches already pay more because they always need Tier 3 builds and longer retainers","The Consumer Protection Act forbids any supplier from charging clients different prices"],"c":0,"why":"A church must be able to compare fees with another church and find they agree.","src":"5.1"}],"handq":{"q":"What does Part 5 hand to Part 6?","a":["Promised outcomes, which Part 6 backs with the actual services and prices","The organigram","The bibliography"],"c":0,"why":"Marketing promises. The service part delivers."}},{"n":6,"title":"the service","presenter":"Jaylon Pillay","minutes":4,"lede":"Three services, one published price list, and a clear edge to what we do.","handover":"The services and prices set the income. Part 7 turns them into budgets and statements.","brief":[{"h":"scope","t":"In scope: the operational church (communication, follow-up, coordination, records, reporting). Out: live service tech (production, streaming, lighting, sound, screens).","src":"6.1"},{"h":"education","t":"Five programmes. Half day R 7,500; full day (Church Administration) R 12,500; custom from R 18,000. Up to 20 participants, with 30 days of email support.","src":"6.1a"},{"h":"automation","t":"Tier 1 R 18,000 build + R 3,500 a month. Tier 2 R 32,000 + R 7,500. Tier 3 R 75,000 + R 15,000. 12-month minimum. Half paid on signing.","src":"6.1a"},{"h":"partnership","t":"Roadmap Engagement R 25,000 (the entry point). Standard partnership R 18,000 a quarter. Network or multi-site: quoted on scope.","src":"6.1a"},{"h":"why claude","t":"Anthropic may not train on business customers' content. Natural writing, it's the team's working tool, and it connects to n8n and Google Workspace.","src":"6.1a"},{"h":"r&d","t":"Year 2: member care chatbot, sermon summaries, medium-church packages. Year 3: predictive giving analytics, volunteer management.","src":"6.2"}],"quiz":[{"q":"Which is OUT of scope?","a":["Live-stream and sound production","Visitor follow-up","Attendance drift detection","Volunteer roster reminders"],"c":0,"why":"In-service and live production technology is out of scope.","src":"6.1"},{"q":"Why is in-service tech out of scope?","a":["Volunteers already handle it well, so an improvement is hard to price honestly","It is too technical","Churches don't use it","POPIA forbids it"],"c":0,"why":"Kairos AI won't sell a service it cannot price with integrity.","src":"6.1"},{"q":"What is 'drift detection'?","a":["Alerting leadership when a regular attender has been absent for a set period","Tracking giving trends","Spotting spam messages","Monitoring server uptime"],"c":0,"why":"It turns attendance data into an active pastoral signal.","src":"6.1a"},{"q":"How are automation tiers defined?","a":["By complexity, not workflow count","By number of workflows","By church size","By number of campuses"],"c":0,"why":"Three simple automations may take a day, while one integration may take three weeks.","src":"6.1a"},{"q":"What is the minimum retainer term?","a":["12 months","3 months","6 months","None"],"c":0,"why":"Retainers carry a 12-month minimum term.","src":"6.1a"},{"q":"How is a build fee paid?","a":["Half on signing, half on delivery","All upfront","Monthly over a year","On delivery only"],"c":0,"why":"It is paid once, 50% on signing and 50% on delivery.","src":"6.1a"},{"q":"What is the entry point into the Strategic AI Partnership?","a":["The Roadmap Engagement, R 25,000","A free workshop","A Tier 3 build","A quarterly review"],"c":0,"why":"The roadmap is the entry point, not the product itself.","src":"6.1a"},{"q":"Which training programme is the full day?","a":["AI-Powered Church Administration","AI Foundations for Church Staff","Responsible AI","AI for Pastoral & Leadership Teams"],"c":0,"why":"R 12,500 per session. The others are half-day at R 7,500, and custom training starts from R 18,000.","src":"6.1a"},{"q":"Which future service extends the drift-detection principle?","a":["Predictive Giving & Engagement Analytics, Year 3","AI Member Care Chatbot, Year 2","Sermon Transcription, Year 2","Live-stream automation"],"c":0,"why":"It analyses attendance and giving patterns to flag disengagement risk early.","src":"6.2"},{"q":"Who owns the 30-day support inbox after a workshop?","a":["Jaylon Pillay, Client Success Lead","Joshua Reed","Keanan Reed","Francine Munava"],"c":0,"why":"Replies within two working days. Technical questions go to the CEO, and leads go to the CRO.","src":"6.1a"}],"figures":[{"p":"Half-day workshop","v":"R 7,500","d":["R 12,500","R 9,025","R 5,000"],"src":"6.1a"},{"p":"Tier 2 build fee","v":"R 32,000","d":["R 18,000","R 75,000","R 32,850"],"src":"6.1a"},{"p":"Tier 3 monthly retainer","v":"R 15,000","d":["R 7,500","R 18,000","R 3,500"],"src":"6.1a"},{"p":"Roadmap Engagement","v":"R 25,000","d":["R 18,000","R 12,500","R 40,000"],"src":"6.1a"},{"p":"Strategic Partnership — Standard, per quarter","v":"R 18,000","d":["R 25,000","R 15,000","R 7,500"],"src":"6.1a"}],"games":[{"type":"sort","title":"in scope or out?","bins":["in scope","out of scope"],"items":[{"t":"Visitor follow-up sequence","b":0},{"t":"Live-stream production","b":1},{"t":"Attendance drift detection","b":0},{"t":"Sound desk during worship","b":1},{"t":"Volunteer roster reminders","b":0},{"t":"Stage lighting","b":1},{"t":"Weekly leadership dashboards","b":0},{"t":"On-screen worship media","b":1},{"t":"Giving acknowledgements","b":0}],"src":"6.1"},{"type":"quote","title":"quote builder","src":"6.1a"}],"panel":[{"q":"Why not offer live-streaming and production tech too?","a":["Volunteers already do it well, so we couldn't price an improvement honestly. Operational work is measurable and protects income","Live production needs specialist hardware we cannot afford until Year 3 of the business","POPIA forbids recording and processing worship services, so that work carries legal risk"],"c":0,"why":"The scope boundary is commercial, and it is stated openly.","src":"6.1"},{"q":"Why Claude and not another AI tool?","a":["Anthropic may not train on business customers' content, it writes in a pastoral register, it is our working tool, and it connects to our stack","Claude is the only AI model that is free for churches and charities registered in South Africa","Anthropic is our investor partner and gives Kairos AI exclusive rights to Claude for churches"],"c":0,"why":"These are the four reasons in 'Why Claude'. Participants also learn principles that carry over to other tools.","src":"6.1a"},{"q":"Who owns the workflows you build?","a":["Kairos AI, unless an IP transfer is negotiated separately. The template library is a trade secret","The church owns every workflow once the build fee is paid, including our underlying templates","n8n owns the workflows, because they run on its platform under its terms of service"],"c":0,"why":"The template library is a key competitive barrier.","src":"6.1a"}],"handq":{"q":"What does Part 6 hand to Part 7?","a":["The prices and services that set income, which Part 7 turns into budgets","The governance rules","The survey results"],"c":0,"why":"The price list feeds the financial model."}},{"n":7,"title":"funding & financials","presenter":"Siphamandla Kunene","minutes":8,"lede":"Funded by its founders, free of debt, and profitable in its first year.","handover":"The numbers rest on documents. Part 8 indexes the evidence in File No. 2.","brief":[{"h":"funding","t":"R 40,000: formation R 2,000, operating costs until self-funding R 19,233, 1-month reserve R 8,828, extra buffer R 9,939.","src":"7.2.1"},{"h":"break-even","t":"Fixed costs R 9,269 a month. Each retainer contributes R 5,825, so 2 retainer clients cover fixed costs. Cumulative profit turns positive in month 5.","src":"7.2.1"},{"h":"lowest cash","t":"R 18,767 in month 6. The business stays cash-positive every month after funding.","src":"7.2.1"},{"h":"three years","t":"Revenue R 581,095, R 2,354,927 and R 4,723,994. Net profit R 288,165, R 808,928 and R 711,437.","src":"7.3"},{"h":"margins","t":"Net margin 49.6%, 34.4% and 15.1%; gross margin 92.1%, 73.4% and 59.8%. They fall as staff and founder pay start, as planned.","src":"7.4"},{"h":"founder pay","t":"None until monthly recurring revenue reaches R 40,000. Tax 27%. VAT registration at the R 2.3 million threshold, reached at the end of Year 2.","src":"7.1"}],"quiz":[{"q":"How many retainer clients cover fixed costs?","a":["2","5","6","10"],"c":0,"why":"R 9,269 fixed ÷ R 5,825 contribution per client is 2. Six are needed once founder pay begins.","src":"7.2.1"},{"q":"When does cumulative profit turn positive?","a":["Month 5","Month 1","Month 12","Year 2"],"c":0,"why":"Workshops and build fees carry the business to break-even early.","src":"7.2.1"},{"q":"When is cash at its lowest?","a":["Month 6, R 18,767","Month 1, R 0","Month 12, R 279,608","Month 3, R 38,000"],"c":0,"why":"This is the lowest cash balance after funding.","src":"7.2.1"},{"q":"When does founder pay begin?","a":["When monthly recurring revenue reaches R 40,000","From month 1","In Year 3","Never"],"c":0,"why":"Then R 20,000 a month in total, shared equally (R 2,500 each at the end of Year 1).","src":"7.1"},{"q":"What company tax rate does the model use?","a":["27%","28%","15%","0%"],"c":0,"why":"27%, paid in two provisional payments. Small business relief is not assumed.","src":"7.1"},{"q":"Why does net margin fall from 49.6% to 15.1%?","a":["Delivery staff and founder pay start, as planned","Prices drop","Clients leave","Tax rises"],"c":0,"why":"Both falls are planned in the analysis.","src":"7.4"},{"q":"What is the build-to-retainer conversion assumption?","a":["90%","50%","100%","80%"],"c":0,"why":"Retainers start two months after signing. Roadmap-to-partnership conversion is 80%.","src":"7.1"},{"q":"How much cash is available at launch after pre-launch costs?","a":["R 38,000","R 40,000","R 18,767","R 2,000"],"c":0,"why":"R 40,000 less R 2,000 of formation costs (CIPC, website, sundry).","src":"7.2.2"},{"q":"Are dividends paid in Years 1 to 3?","a":["No, profits are retained","Yes, every year","Only in Year 3","Only to 13% holders"],"c":0,"why":"Profits are retained in the business across all three years.","src":"7.3"}],"figures":[{"p":"Year 1 net profit margin","v":"49.6%","d":["92.1%","34.4%","15.1%"],"src":"7.4"},{"p":"Year 2 net profit","v":"R 808,928","d":["R 711,437","R 1,108,121","R 288,165"],"src":"7.3"},{"p":"Year 3 net profit","v":"R 711,437","d":["R 808,928","R 974,571","R 1,578,254"],"src":"7.3"},{"p":"Lowest cash balance (month 6)","v":"R 18,767","d":["R 19,233","R 9,939","R 27,442"],"src":"7.2.1"},{"p":"Fixed monthly costs, Year 1","v":"R 9,269","d":["R 8,828","R 5,825","R 2,393"],"src":"7.2.1"},{"p":"Cash at end of Year 1","v":"R 279,608","d":["R 288,165","R 344,590","R 960,730"],"src":"7.3"},{"p":"MRR at end of Year 1","v":"R 42,735","d":["R 40,000","R 37,935","R 162,910"],"src":"7.4"},{"p":"Year 1 gross margin","v":"92.1%","d":["49.6%","73.4%","59.8%"],"src":"7.4"}],"games":[{"type":"catch"}],"panel":[{"q":"A 49.6% net margin in Year 1 looks high. Why is it believable?","a":["Founders are unpaid until MRR reaches R 40,000, there are no premises and overheads are low. Margins fall as staff and pay start","Our prices sit above the market ranges, so each sale carries a much higher margin","The model leaves out tax and insurance in Year 1, which lifts the margin"],"c":0,"why":"Founder pay starts only in February 2028. All costs, including tax at 27%, are carried.","src":"7.4"},{"q":"Why does net profit fall from Year 2 to Year 3?","a":["Delivery staff, a sales representative and higher founder pay come in, as planned","Revenue drops in Year 3 as early retainer clients leave after their 12-month terms","A VAT payment owed from Year 2 is settled in Year 3, which reduces the profit"],"c":0,"why":"Revenue grows 101% in Year 3. Costs rise faster by design.","src":"7.4"},{"q":"What is your biggest cash risk, and is it covered?","a":["Cash is lowest at R 18,767 in month 6, and the R 40,000 includes a reserve and a buffer","Cash is lowest in month 1, so the founders top up the account if it ever goes negative","There is no cash risk, because workshops are prepaid and cover every month's costs"],"c":0,"why":"The funding covers set-up, operating costs to month 6, a 1-month reserve and a R 9,939 buffer.","src":"7.2.1"},{"q":"Why no audit?","a":["Every shareholder is a director, so the company is exempt under s30(2A), but a CA reviews the books quarterly","Audits are optional for every private company, so the board chose to save the fee","SARS audits small companies itself, so a separate audit would duplicate its work"],"c":0,"why":"R 7,500 a year covers the annual statements and tax returns.","src":"7.5"}],"handq":{"q":"What does Part 7 hand to Part 8?","a":["Figures that rest on documents, which Part 8 indexes in File No. 2","A new price list","The marketing channels"],"c":0,"why":"The quotations, agreements and model are filed as evidence."}},{"n":8,"title":"practicalities","presenter":"Francine Munava","minutes":4,"lede":"The documents that turn a plan into a company.","handover":"The evidence is filed. The close sums up the plan in three sentences and opens the panel questions.","brief":[{"h":"file no. 2","t":"Part 8 is the index of File No. 2, the supporting documents, numbered to the marking sheet. Only 8.21 laws and 8.22 bibliography are printed in full.","src":"8"},{"h":"founding documents","t":"8.1 Constitution and 8.2 Statement of Faith, both signed by all eight directors on 17 August 2026. 8.3 AGM guide: AGM by 31 August.","src":"8"},{"h":"not applicable","t":"8.4 PBO and 8.5 NPO: not applicable, as Kairos AI is for-profit. 8.19 marriage officer: not applicable. 8.20: no trade licence is needed.","src":"8"},{"h":"agreements","t":"8.14: founders' capital commitments (R 40,000), the Technology Advisor Agreement with Calvin Munava, and the other advisors' agreements.","src":"8"},{"h":"the team record","t":"8.15 scorecards, 8.16 attendance register (8 meetings, 17 Feb to 17 Aug 2026), 8.17 minutes, 8.18 survey with 41 responses.","src":"8"},{"h":"laws","t":"8.21 lists 11 items: POPIA, ECTA, CPA, Companies Act, LRA, BCEA, Income Tax and VAT, NPO Act (not applicable to us), B-BBEE, WhatsApp terms, AI regulation.","src":"8.21"}],"quiz":[{"q":"Why is there no PBO or NPO application?","a":["Kairos AI is a for-profit company","It was rejected","It is still pending","Churches don't need one"],"c":0,"why":"8.4 and 8.5 are not applicable.","src":"8"},{"q":"When were the Constitution and Statement of Faith signed?","a":["17 August 2026","1 March 2027","17 February 2026","28 February 2027"],"c":0,"why":"Both were adopted and signed by all eight directors on 17 August 2026.","src":"8"},{"q":"Where are the founders' capital commitments filed?","a":["8.14 agreement letters","8.1 Constitution","8.13 quotations","8.17 minutes"],"c":0,"why":"8.14: R 40,000 in total, due by 28 February 2027.","src":"8"},{"q":"What is in 8.13 Quotations?","a":["The vendors' published price lists for the expense lines","Quotes sent to churches","Bank loan offers","Founders' salaries"],"c":0,"why":"They back the cost figures in Section 7.5.","src":"8"},{"q":"How many syndicate meetings are on the attendance register?","a":["8","12","4","41"],"c":0,"why":"Eight meetings, 17 February to 17 August 2026.","src":"8"},{"q":"Which law does NOT apply to Kairos AI itself?","a":["Nonprofit Organisations Act","POPIA","Companies Act","Consumer Protection Act"],"c":0,"why":"It governs many clients, whose reporting duties shape the automations Kairos AI builds.","src":"8.21"},{"q":"What is 8.11 Corporate identity?","a":["The Kairos AI brand kit, version 1.0","The CIPC certificate","The founders' ID documents","The website"],"c":0,"why":"The brand kit is also on the memory stick.","src":"8"},{"q":"Does Kairos AI need a trade or professional licence?","a":["No, only the registrations listed under 8.6","Yes, a technology licence","Yes, a marriage officer licence","Yes, an NPO certificate"],"c":0,"why":"8.20: no trade or professional licence is required.","src":"8"}],"figures":[{"p":"Items in the laws register (8.21)","v":"11","d":["8","22","5"],"src":"8.21"},{"p":"Syndicate meetings recorded","v":"8","d":["6","12","41"],"src":"8"},{"p":"Survey responses filed (8.18)","v":"41","d":["16","29","33"],"src":"8"}],"games":[{"type":"match","title":"file no. 2","mode":"docs","pairs":[["Constitution","8.1"],["Statement of Faith","8.2"],["AGM Procedure Guide","8.3"],["Agreement letters and capital","8.14"],["Vendor price lists","8.13"],["Survey, 41 responses","8.18"],["Laws of country","8.21"],["Bibliography","8.22"]],"src":"8"}],"panel":[{"q":"Where is your proof that the founders will pay in the capital?","a":["8.14 agreement letters: R 5,200 from each 13% founder and R 4,800 from each 12% founder, due by 28 February 2027","It is recorded in the minutes of the first syndicate meeting, held on 17 February 2026","Each founder has paid in R 5,000, shown on the Capitec statement under 8.13"],"c":0,"why":"This is the 8.14 index line.","src":"8"},{"q":"The Constitution says 12.5% each, but the plan says 13% and 12%. Which is right?","a":["13% and 12%. The amendment resolution, filed with the Constitution under 8.1, corrects it","12.5% is right. The plan rounds for the B-BBEE score but legal ownership stays at 12.5%","Both are valid until the AGM votes on which split to adopt, by special resolution"],"c":0,"why":"8.1 files the Constitution with the resolution amending it.","src":"8"},{"q":"Which law shapes your service the most?","a":["POPIA: we act as operator for each church under a written agreement, with data minimisation","The Companies Act: it sets how we register, govern and report as a Pty Ltd","The Electronic Communications and Transactions Act: it covers all our automated messages"],"c":0,"why":"POPIA is item 1 in 8.21 and the main market restriction in 2.3.","src":"8.21"}],"handq":{"q":"What does Part 8 hand to the close?","a":["Evidence that the plan is real, before the three-sentence summary and panel questions","The price list","The survey"],"c":0,"why":"Documents turn a plan into a company."}}],"quotes":[{"brief":"A large church books two half-day workshops: AI Foundations and Responsible AI.","need":{"half":2},"total":15000,"src":"6.1a"},{"brief":"A church signs a Tier 2 automation build plus its first 3 months of retainer.","need":{"t2b":1,"t2r":3},"total":54500,"src":"6.1a"},{"brief":"A church takes the Roadmap Engagement, then its first quarter of the Standard partnership.","need":{"road":1,"spq":1},"total":43000,"src":"6.1a"},{"brief":"A church books the full-day Church Administration workshop, then a Tier 1 build with 12 months of retainer.","need":{"full":1,"t1b":1,"t1r":12},"total":72500,"src":"6.1a"},{"brief":"A multi-campus church signs a Tier 3 build plus 2 months of retainer.","need":{"t3b":1,"t3r":2},"total":105000,"src":"6.1a"}],"priceList":[{"id":"half","name":"Half-day workshop","price":7500},{"id":"full","name":"Full-day workshop","price":12500},{"id":"t1b","name":"Tier 1 build","price":18000},{"id":"t1r","name":"Tier 1 retainer, month","price":3500},{"id":"t2b","name":"Tier 2 build","price":32000},{"id":"t2r","name":"Tier 2 retainer, month","price":7500},{"id":"t3b","name":"Tier 3 build","price":75000},{"id":"t3r","name":"Tier 3 retainer, month","price":15000},{"id":"road","name":"Roadmap Engagement","price":25000},{"id":"spq","name":"Partnership, quarter","price":18000}]};</script>
+<script>
+(function () {
+  'use strict';
+  const D = window.GAME_DATA;
+  const app = document.getElementById('app');
+  const PART = {}; D.parts.forEach(p => { PART[p.n] = p; });
+
+  // ── storage (per device; the game still runs if storage is blocked) ──
+  const KEY = 'kairosPlanGame.v1';
+  const fresh = () => ({ player: null, stars: {}, best: {}, review: {}, tests: {} });
+  let S = (() => { try { return Object.assign(fresh(), JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { return fresh(); } })();
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* storage unavailable */ } };
+
+  // ── helpers ──
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const rand = n => Math.floor(Math.random() * n);
+  const R = n => 'R ' + String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const buzz = () => { try { navigator.vibrate && navigator.vibrate(40); } catch (e) {} };
+  const mark = '<span class="mark">ka<span class="i">ı</span>ros ai</span>';
+  const starStr = n => '<span class="stars">' + [1, 2, 3].map(i => i <= n ? '★' : '<span class="off">★</span>').join('') + '</span>';
+  const starsFor = pct => pct >= 0.9 ? 3 : pct >= 0.7 ? 2 : 1;
+  let cleanup = [];
+  const onLeave = fn => cleanup.push(fn);
+  function clearScreen() { cleanup.forEach(f => { try { f(); } catch (e) {} }); cleanup = []; }
+
+  // ── item bank: every question carries its plan section ──
+  const BANK = [], BY_ID = {};
+  const add = it => { BANK.push(it); BY_ID[it.id] = it; };
+  D.parts.forEach(p => {
+    p.quiz.forEach((x, i) => add({ id: `p${p.n}q${i}`, part: p.n, kind: 'quiz', q: x.q, a: x.a, c: x.c, why: x.why, src: x.src }));
+    p.panel.forEach((x, i) => add({ id: `p${p.n}p${i}`, part: p.n, kind: 'panel', q: x.q, a: x.a, c: x.c, why: x.why, src: x.src }));
+    p.figures.forEach((x, i) => add({ id: `p${p.n}f${i}`, part: p.n, kind: 'figure', q: x.p + '?', a: [x.v].concat(x.d), c: 0, why: `${x.p}: ${x.v}.`, src: x.src, fig: x }));
+    add({ id: `p${p.n}h`, part: p.n, kind: 'hand', q: p.handq.q, a: p.handq.a, c: p.handq.c, why: p.handover, src: 'flow' });
+  });
+  const LABELS = {
+    '1.1': 'background', '1.2': 'vision & mission', '1.3': 'smart goals',
+    '2.1': 'the survey', '2.1a': 'competitors', '2.1b': 'customer needs', '2.1c': 'industry', '2.2': 'swot', '2.3': 'regulation',
+    '3.1b': 'target market', '3.1c': 'location', '3.1d': 'culture', '3.2': 'legal & ownership', '3.3': 'competitive advantage',
+    '4.1': 'structure', '4.2': 'profiles & board', '4.3': 'governance', '4.4': 'internal risks',
+    '5.1': 'four p\'s', '5.2': 'penetration & sales', '5.3': 'barriers',
+    '6.1': 'scope', '6.1a': 'programmes & prices', '6.2': 'r&d',
+    '7.1': 'assumptions', '7.2': 'budgets', '7.3': 'reports', '7.4': 'analysis', '7.5': 'general',
+    '8': 'file no. 2 index', '8.21': 'laws', 'flow': 'hand-over'
+  };
+  const chipOf = src => src === 'flow' ? 'flow' : src.split('.').slice(0, 2).join('.');
+  const secLabel = src => src === 'flow' ? 'hand-over' : 'Section ' + src;
+
+  // spaced review: a miss goes in the pile; two later correct answers clear it
+  const missed = id => { if (id && BY_ID[id]) { S.review[id] = { box: 0 }; save(); } };
+  const hit = id => { const r = S.review[id]; if (!r) return; r.box++; if (r.box >= 2) delete S.review[id]; save(); };
+
+  // ── layout shell ──
+  function screen(html, opts = {}) {
+    clearScreen();
+    const back = opts.back ? `<button class="back" data-back>← ${esc(opts.backLabel || 'back')}</button>` : '';
+    const me = S.player != null ? D.founders[S.player] : null;
+    const right = opts.hideMe ? '' : me ? `<button class="chip-me" data-me>${esc(me.name.split(' ')[0])} · part ${me.part}</button>` : '';
+    app.innerHTML = `<div class="top">${back || mark}${right}</div><main class="screen">${html}</main>`;
+    window.scrollTo(0, 0);
+    const b = app.querySelector('[data-back]'); if (b) b.onclick = opts.back;
+    const m = app.querySelector('[data-me]'); if (m) m.onclick = pickPlayer;
+    return app.querySelector('main');
+  }
+  const on = (root, sel, fn) => root.querySelectorAll(sel).forEach(el => { el.onclick = e => fn(el, e); });
+
+  // ── player ──
+  function pickPlayer() {
+    const main = screen(`
+      <div><p class="lab">syndicate #6</p><h1>who's playing?</h1></div>
+      <p class="muted" style="margin:0">Pick your name. Your own part is marked, and progress stays on this phone only.</p>
+      <div class="grid2">${D.founders.map((f, i) => `
+        <button class="tile" data-i="${i}"><span class="av ${i === S.player ? 'me' : ''}">${f.ini}</span><span><b>${esc(f.name.split(' ')[0])}</b><br><small>Part ${f.part} · ${esc(PART[f.part].title)}</small></span></button>`).join('')}
+      </div>`, { hideMe: true, back: S.player != null ? home : null });
+    on(main, '[data-i]', el => { S.player = +el.dataset.i; save(); home(); });
+  }
+
+  // ── home ──
+  function home() {
+    if (S.player == null) return pickPlayer();
+    const me = D.founders[S.player], p = PART[me.part];
+    const total = D.parts.reduce((a, x) => a + (S.stars[x.n] || 0), 0);
+    const rev = Object.keys(S.review).filter(id => BY_ID[id]).length;
+    const main = screen(`
+      <div class="hero"><h1>learn the plan.<br><em>own your part.</em></h1><p>Less admin. More ministry. Wednesday, 45 minutes, eight parts.</p></div>
+      <div class="card" style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="tag">your part</span>${starStr(S.stars[p.n] || 0)}</div>
+        <div><p class="lab">part ${p.n} · ${p.minutes} minutes</p><h2>${esc(p.title)}</h2></div>
+        <p class="muted" style="margin:0">${esc(p.lede)}</p>
+        <div class="row"><button class="btn" data-go="mission">play mission</button><button class="btn ghost" data-go="mytest">test me</button></div>
+      </div>
+      <div class="grid2">
+        <button class="tile" data-go="map"><b>play</b><small>All eight parts as arcade missions. ${total}/24 stars</small></button>
+        <button class="tile" data-go="section"><b>section test</b><small>Pick any part, narrow to sub-sections</small></button>
+        <button class="tile" data-go="full"><b>full plan test</b><small>40 questions, weighted like the marking sheet</small></button>
+        <button class="tile" data-go="review"><b>review pile</b><small>${rev ? rev + ' item' + (rev > 1 ? 's' : '') + ' to fix' : 'Nothing to review yet'}</small></button>
+      </div>
+      <button class="tile dark" data-go="final" style="min-height:84px"><b>the 45 minutes</b><small>Final round: running order, hand-overs and a 15-question panel gauntlet. ${S.stars.final ? starStr(S.stars.final) : ''}</small></button>`);
+    on(main, '[data-go]', el => ({
+      mission: () => mission(p.n), mytest: () => sectionSetup(p.n), map, section: () => sectionSetup(me.part),
+      full: fullSetup, review, final
+    })[el.dataset.go]());
+  }
+
+  // ── map ──
+  function map() {
+    const me = D.founders[S.player];
+    const main = screen(`
+      <div><p class="lab">play</p><h1>the plan, part by part</h1></div>
+      <div class="path">${D.parts.map(p => `
+        <div class="stop ${S.stars[p.n] ? 'done' : ''}"><div class="rail"><div class="num">${p.n}</div><div class="line"></div></div>
+          <button class="tile" data-n="${p.n}"><span style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b>${esc(p.title)}</b>${starStr(S.stars[p.n] || 0)}</span>
+          <small>${esc(p.presenter)} · ${p.minutes} min ${p.n === me.part ? ' · <span class="tag">your part</span>' : ''}</small></button></div>`).join('')}
+        <div class="stop"><div class="rail"><div class="num">★</div></div><button class="tile dark" data-final><b>the 45 minutes</b><small>Final round ${S.stars.final ? starStr(S.stars.final) : ''}</small></button></div>
+      </div>`, { back: home, backLabel: 'home' });
+    on(main, '[data-n]', el => mission(+el.dataset.n));
+    on(main, '[data-final]', final);
+  }
+
+  // ── generic multiple-choice question ──
+  // opts: { label, timer (seconds), onDone(ok) }
+  function mcq(stage, item, opts) {
+    const order = shuffle(item.a.map((t, i) => i));
+    let answered = false, raf = 0;
+    stage.innerHTML = `
+      ${opts.head || ''}
+      <p class="q">${esc(item.q)}</p>
+      <div class="opts">${order.map((i, k) => `<button class="opt" data-i="${i}"><span class="k">${'ABCD'[k]}</span><span>${esc(item.a[i])}</span></button>`).join('')}</div>
+      <div data-fb></div>`;
+    const finish = (picked) => {
+      if (answered) return; answered = true; cancelAnimationFrame(raf);
+      const ok = picked === item.c;
+      stage.querySelectorAll('.opt').forEach(b => {
+        b.disabled = true;
+        if (+b.dataset.i === item.c) b.classList.add('right');
+        else if (+b.dataset.i === picked) b.classList.add('wrong', 'shake');
+      });
+      if (!ok) buzz();
+      ok ? hit(item.id) : missed(item.id);
+      const fb = stage.querySelector('[data-fb]');
+      fb.innerHTML = `<div class="fb"><b>${picked === -1 ? 'time’s up.' : ok ? 'right.' : 'not quite.'}</b>${esc(item.why)} <span class="src">${esc(secLabel(item.src))}</span></div>
+        <button class="btn" data-next style="margin-top:14px">${esc(opts.nextLabel || 'next')}</button>`;
+      fb.querySelector('[data-next]').onclick = () => opts.onDone(ok);
+      fb.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (opts.onAnswer) opts.onAnswer(ok);
+    };
+    on(stage, '.opt', b => finish(+b.dataset.i));
+    if (opts.timer) {
+      const ring = stage.querySelector('[data-ring]'), C = 2 * Math.PI * 28, t0 = performance.now();
+      const tick = now => {
+        const left = Math.max(0, opts.timer - (now - t0) / 1000);
+        if (ring) { ring.querySelector('circle.f').style.strokeDashoffset = C * (1 - left / opts.timer); ring.querySelector('span').textContent = Math.ceil(left); }
+        if (left <= 0) return finish(-1);
+        raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+      onLeave(() => cancelAnimationFrame(raf));
+    }
+  }
+  const ringSvg = () => { const C = 2 * Math.PI * 28; return `<div class="ring" data-ring><svg width="64" height="64"><circle cx="32" cy="32" r="28" fill="none" stroke="#DCD8CE" stroke-width="6"/><circle class="f" cx="32" cy="32" r="28" fill="none" stroke="#E23B2E" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="0"/></svg><span></span></div>`; };
+  const panelSvg = () => {
+    const person = c => `<svg width="46" height="52" viewBox="0 0 46 52"><circle cx="23" cy="15" r="11" fill="${c}"/><path d="M2 52c0-13 9-21 21-21s21 8 21 21z" fill="${c}"/></svg>`;
+    return `<div class="panel"><div class="pv">${person('#16161A')}</div><div class="pv" style="transform:scale(1.12)">${person('#E23B2E')}</div><div class="pv">${person('#16161A')}</div></div>`;
+  };
+
+  // ── mission runner ──
+  const STEP_NAMES = { brief: 'brief', recall: 'quick recall', catch: 'number catch', sort: 'swipe sort', match: 'who’s who', order: 'flow chain', quote: 'quote builder', hotseat: 'panel hot seat', hand: 'hand-over' };
+  function mission(n) {
+    const p = PART[n];
+    const steps = [{ t: 'brief' }, { t: 'recall' }].concat(p.games.map(g => ({ t: g.type, g })), [{ t: 'hotseat' }, { t: 'hand' }]);
+    runSteps({
+      title: `part ${n} · ${p.title}`, steps, part: p,
+      onEnd: (r, t) => {
+        const pct = t ? r / t : 0, st = starsFor(pct);
+        S.stars[n] = Math.max(S.stars[n] || 0, st); S.best[n] = Math.max(S.best[n] || 0, Math.round(pct * 100)); save();
+        result({ title: p.title, pct, stars: st, again: () => mission(n), next: n < 8 ? () => mission(n + 1) : final, nextLabel: n < 8 ? `part ${n + 1}` : 'the 45 minutes', handover: p.handover });
+      }
+    });
+  }
+  function runSteps(cfg) {
+    let i = 0, R = 0, T = 0;
+    const go = () => {
+      if (i >= cfg.steps.length) return cfg.onEnd(R, T);
+      const st = cfg.steps[i];
+      const main = screen(`
+        <div class="prog">${cfg.steps.map((_, k) => `<i class="${k < i ? 'on' : k === i ? 'cur' : ''}"></i>`).join('')}</div>
+        <div><p class="lab">${esc(cfg.title)} · ${i + 1}/${cfg.steps.length}</p><h2>${esc(st.g && st.g.title || STEP_NAMES[st.t])}</h2></div>
+        <div data-stage style="display:flex;flex-direction:column;gap:14px;flex:1"></div>`, { back: () => confirmLeave(home) });
+      const stage = main.querySelector('[data-stage]');
+      STEPS[st.t](stage, Object.assign({ part: cfg.part }, st), (r, t) => { R += r; T += t; i++; go(); });
+    };
+    go();
+  }
+  function confirmLeave(to) { if (window.confirm('Leave this round? Progress in it will be lost.')) to(); }
+
+  // ── step: brief cards ──
+  function stepBrief(stage, ctx, done) {
+    const cards = ctx.part.brief; let k = 0;
+    const show = () => {
+      const c = cards[k];
+      stage.innerHTML = `
+        <div class="card brief"><p class="lab">${k + 1} of ${cards.length}</p><h3>${esc(c.h)}</h3><p>${esc(c.t)}</p><span class="src">${esc(secLabel(c.src))}</span></div>
+        <p class="muted" style="margin:0;font-size:14px">Read it, then say it out loud in your own words before you tap on.</p>
+        <div class="spacer"></div>
+        <div class="row">${k ? '<button class="btn ghost" data-p>back</button>' : ''}<button class="btn" data-n>${k < cards.length - 1 ? 'next card' : 'test me'}</button></div>`;
+      on(stage, '[data-p]', () => { k--; show(); });
+      on(stage, '[data-n]', () => { if (k < cards.length - 1) { k++; show(); } else done(0, 0); });
+    };
+    show();
+  }
+
+  // ── step: quick recall ──
+  function stepRecall(stage, ctx, done) {
+    const items = shuffle(BANK.filter(x => x.part === ctx.part.n && x.kind === 'quiz')).slice(0, 6);
+    let k = 0, r = 0, combo = 0;
+    const ask = () => {
+      if (k >= items.length) return done(r, items.length);
+      mcq(stage, items[k], {
+        head: `<div class="hud"><span>question <b>${k + 1}</b>/${items.length}</span><span>streak <b>${combo}</b></span></div>`,
+        onDone: ok => { if (ok) { r++; combo++; } else combo = 0; k++; ask(); }
+      });
+    };
+    ask();
+  }
+
+  // ── step: number catch ──
+  function stepCatch(stage, ctx, done, figsIn) {
+    const figs = figsIn || shuffle(BANK.filter(x => x.part === ctx.part.n && x.kind === 'figure')).slice(0, 6);
+    let k = 0, right = 0, combo = 0, pts = 0, raf = 0;
+    stage.innerHTML = `<div class="hud"><span>round <b data-k>1</b>/${figs.length}</span><span>combo <b data-c>0</b></span><span><b data-pts>0</b> pts</span></div>
+      <p class="muted" style="margin:0;font-size:14px">Tap the right figure before it floats away.</p>
+      <div class="prompt" data-prompt></div><div class="field" data-field></div>`;
+    const field = stage.querySelector('[data-field]');
+    onLeave(() => cancelAnimationFrame(raf));
+    const hud = () => { stage.querySelector('[data-k]').textContent = Math.min(k + 1, figs.length); stage.querySelector('[data-c]').textContent = combo; stage.querySelector('[data-pts]').textContent = pts; };
+    const toast = (html, ms, then) => { const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = html; field.appendChild(t); setTimeout(then, ms); };
+    const round = () => {
+      cancelAnimationFrame(raf);
+      if (k >= figs.length) return done(right, figs.length);
+      hud(); field.innerHTML = '';
+      const it = figs[k], f = it.fig, vals = shuffle([f.v].concat(f.d));
+      stage.querySelector('[data-prompt]').textContent = f.p;
+      const W = field.clientWidth, H = field.clientHeight, GAP = 96, bw = Math.floor(W / 2) - 18;
+      const dur = Math.max(4.5, 8.5 - combo * 0.6), dist = H + GAP * vals.length + 80, speed = dist / dur;
+      let wrongTaps = 0, over = false;
+      const bubs = vals.map((v, j) => {
+        const b = document.createElement('button'); b.className = 'bub'; b.textContent = v; b.style.width = bw + 'px';
+        const x = j % 2 ? W - bw - 12 : 12, y0 = H + 10 + j * GAP;
+        b.style.transform = `translate(${x}px,${y0}px)`; field.appendChild(b);
+        const o = { b, v, x, y0, ok: v === f.v };
+        b.onclick = () => {
+          if (over || b.classList.contains('x')) return;
+          if (o.ok) {
+            over = true; cancelAnimationFrame(raf); b.classList.add('pop');
+            if (!wrongTaps) { right++; combo++; hit(it.id); } else { missed(it.id); }
+            pts += wrongTaps ? 5 : 10 + combo * 2; hud();
+            toast(`<b>${esc(f.v)}</b> · ${esc(f.p)} <span class="src">${esc(secLabel(it.src))}</span>`, 1300, () => { k++; round(); });
+          } else { wrongTaps++; combo = 0; buzz(); b.classList.add('x', 'shake'); hud(); }
+        };
+        return o;
+      });
+      const t0 = performance.now();
+      const tick = now => {
+        const dy = speed * (now - t0) / 1000;
+        let escaped = false;
+        bubs.forEach(o => { const y = o.y0 - dy; o.b.style.transform = `translate(${o.x}px,${y}px)`; if (o.ok && y < -70) escaped = true; });
+        if (escaped && !over) {
+          over = true; combo = 0; missed(it.id); hud();
+          return toast(`It was <b>${esc(f.v)}</b> · ${esc(f.p)} <span class="src">${esc(secLabel(it.src))}</span>`, 1800, () => { k++; round(); });
+        }
+        if (!over) raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(round);
+  }
+
+  // ── step: swipe sort ──
+  function stepSort(stage, ctx, done) {
+    const g = ctx.g, items = shuffle(g.items).slice(0, 9);
+    let k = 0, right = 0, streak = 0, timer = 0;
+    onLeave(() => clearTimeout(timer));
+    const show = () => {
+      if (k >= items.length) return done(right, items.length);
+      const it = items[k], secs = Math.max(6, 11 - streak * 0.6);
+      stage.innerHTML = `<div class="hud"><span>card <b>${k + 1}</b>/${items.length}</span><span>streak <b>${streak}</b></span></div>
+        <div class="card sortcard">${esc(it.t)}</div>
+        <div class="timer"><i data-t style="transition:transform ${secs}s linear"></i></div>
+        <div class="bins" style="${g.bins.length === 2 ? '' : ''}">${g.bins.map((b, i) => `<button class="bin" data-b="${i}">${esc(b)}</button>`).join('')}</div>
+        <div data-fb style="min-height:44px"></div>`;
+      const bar = stage.querySelector('[data-t]');
+      requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.transform = 'scaleX(0)'; }));
+      let done1 = false;
+      const answer = pick => {
+        if (done1) return; done1 = true; clearTimeout(timer);
+        const ok = pick === it.b;
+        stage.querySelectorAll('.bin').forEach(b => { b.disabled = true; if (+b.dataset.b === it.b) b.classList.add('right'); else if (+b.dataset.b === pick) b.classList.add('wrong', 'shake'); });
+        if (ok) { right++; streak++; } else { streak = 0; buzz(); }
+        stage.querySelector('[data-fb]').innerHTML = `<div class="fb"><b>${pick === -1 ? 'time’s up.' : ok ? 'right.' : 'not quite.'}</b>It goes in <b style="display:inline">${esc(g.bins[it.b])}</b>. <span class="src">${esc(secLabel(g.src))}</span></div>`;
+        timer = setTimeout(() => { k++; show(); }, ok ? 900 : 1900);
+      };
+      on(stage, '[data-b]', b => answer(+b.dataset.b));
+      timer = setTimeout(() => answer(-1), secs * 1000);
+    };
+    show();
+  }
+
+  // ── step: match (who's who) ──
+  function pairsFor(g) {
+    if (g.mode === 'role') return D.founders.map(f => ({ l: f.name, ini: f.ini, r: f.role }));
+    if (g.mode === 'lede') return D.parts.map(p => ({ l: `Part ${p.n} · ${p.title}`, r: p.lede }));
+    return g.pairs.map(([l, r]) => ({ l, r }));
+  }
+  function stepMatch(stage, ctx, done) {
+    const all = shuffle(pairsFor(ctx.g)), rounds = [];
+    for (let i = 0; i < all.length; i += 4) rounds.push(all.slice(i, i + 4));
+    let ri = 0, clean = 0, mistakes = 0, t0 = performance.now(), iv = 0;
+    onLeave(() => clearInterval(iv));
+    const play = () => {
+      if (ri >= rounds.length) { clearInterval(iv); return done(clean, all.length); }
+      const ps = rounds[ri], rights = shuffle(ps.map((p, i) => ({ r: p.r, i })));
+      const tried = new Set(); let sel = null, matched = 0;
+      stage.innerHTML = `<div class="hud"><span>set <b>${ri + 1}</b>/${rounds.length}</span><span>misses <b data-m>${mistakes}</b></span><span><b data-s>0</b>s</span></div>
+        <p class="muted" style="margin:0;font-size:14px">Tap a left tile, then its match on the right.</p>
+        <div class="match"><div class="col">${ps.map((p, i) => `<button class="mt" data-l="${i}">${p.ini ? `<span class="av">${p.ini}</span>` : ''}<span>${esc(p.l)}</span></button>`).join('')}</div>
+        <div class="col">${rights.map(x => `<button class="mt" data-r="${x.i}">${esc(x.r)}</button>`).join('')}</div></div>
+        <div class="src">${esc(secLabel(ctx.g.src))}</div>`;
+      clearInterval(iv); iv = setInterval(() => { const s = stage.querySelector('[data-s]'); if (s) s.textContent = Math.round((performance.now() - t0) / 1000); }, 500);
+      on(stage, '[data-l]', el => { if (el.classList.contains('done')) return; stage.querySelectorAll('[data-l]').forEach(x => x.classList.remove('sel')); el.classList.add('sel'); sel = +el.dataset.l; });
+      on(stage, '[data-r]', el => {
+        if (sel == null || el.classList.contains('done')) return;
+        const ok = ps[+el.dataset.r].r === ps[sel].r;
+        const L = stage.querySelector(`[data-l="${sel}"]`);
+        if (ok) {
+          L.classList.remove('sel'); L.classList.add('done'); el.classList.add('done');
+          if (!tried.has(sel)) clean++;
+          matched++; sel = null;
+          if (matched === ps.length) setTimeout(() => { ri++; play(); }, 500);
+        } else { tried.add(sel); mistakes++; buzz(); el.classList.add('shake'); setTimeout(() => el.classList.remove('shake'), 400); stage.querySelector('[data-m]').textContent = mistakes; }
+      });
+    };
+    play();
+  }
+
+  // ── step: order (flow chain) ──
+  function stepOrder(stage, ctx, done) {
+    const g = ctx.g, n = g.items.length;
+    let next = 0, clean = 0, missThis = false;
+    const pool = shuffle(g.items.map((t, i) => i));
+    const draw = () => {
+      stage.innerHTML = `<div class="hud"><span>linked <b>${next}</b>/${n}</span><span>first-try <b>${clean}</b></span></div>
+        <p class="muted" style="margin:0;font-size:14px">${esc(g.hint || 'Tap the steps in the right order.')}</p>
+        <div class="chain">${g.items.slice(0, next).map((t, i) => `<div class="link"><span class="n">${i + 1}</span><span>${esc(t)}<small>${esc(g.notes[i])}</small></span></div>`).join('')}</div>
+        <div class="pool">${pool.filter(i => i >= next).map(i => `<button class="opt" data-o="${i}">${esc(g.items[i])}</button>`).join('')}</div>
+        <div class="src">${esc(secLabel(g.src))}</div>`;
+      on(stage, '[data-o]', el => {
+        if (+el.dataset.o === next) { if (!missThis) clean++; missThis = false; next++; if (next === n) { draw(); setTimeout(() => done(clean, n), 1100); } else draw(); }
+        else { missThis = true; buzz(); el.classList.add('wrong', 'shake'); setTimeout(() => el.classList.remove('wrong', 'shake'), 500); }
+      });
+    };
+    draw();
+  }
+
+  // ── step: quote builder ──
+  function stepQuote(stage, ctx, done) {
+    const scen = shuffle(D.quotes).slice(0, 2);
+    let k = 0, right = 0;
+    const play = () => {
+      if (k >= scen.length) return done(right, scen.length);
+      const sc = scen[k], cnt = {}; D.priceList.forEach(x => { cnt[x.id] = 0; });
+      let shown = 0, anim = 0;
+      stage.innerHTML = `<div class="hud"><span>quote <b>${k + 1}</b>/${scen.length}</span><span>prices exclude VAT</span></div>
+        <div class="card"><p class="lab">the brief</p><p style="margin:0;font-size:17px;font-weight:600">${esc(sc.brief)}</p></div>
+        <div class="plist">${D.priceList.map(x => `<div class="pi"><span class="nm">${esc(x.name)}</span><span class="pr">${R(x.price)}</span>
+          <div class="step"><button data-m="${x.id}" aria-label="remove">−</button><span data-c="${x.id}">0</span><button data-p="${x.id}" aria-label="add">+</button></div></div>`).join('')}</div>
+        <div class="total"><div style="display:flex;justify-content:space-between;align-items:baseline"><span class="lab" style="margin:0">quote total</span><span class="amt" data-amt>R 0</span></div>
+          <div data-fb></div><button class="btn" data-check>check quote</button></div>`;
+      onLeave(() => cancelAnimationFrame(anim));
+      const sum = () => D.priceList.reduce((a, x) => a + x.price * cnt[x.id], 0);
+      const roll = () => {
+        cancelAnimationFrame(anim); const target = sum(), from = shown, t0 = performance.now();
+        const f = now => { const p = Math.min(1, (now - t0) / 350); shown = Math.round(from + (target - from) * p); stage.querySelector('[data-amt]').textContent = R(shown); if (p < 1) anim = requestAnimationFrame(f); };
+        anim = requestAnimationFrame(f);
+      };
+      const set = (id, d) => { cnt[id] = Math.max(0, Math.min(24, cnt[id] + d)); stage.querySelector(`[data-c="${id}"]`).textContent = cnt[id]; roll(); };
+      on(stage, '[data-p]', el => set(el.dataset.p, 1));
+      on(stage, '[data-m]', el => set(el.dataset.m, -1));
+      on(stage, '[data-check]', btn => {
+        const ok = D.priceList.every(x => (sc.need[x.id] || 0) === cnt[x.id]);
+        if (ok) right++; else buzz();
+        const lines = Object.keys(sc.need).map(id => { const x = D.priceList.find(y => y.id === id); return `${sc.need[id]} × ${x.name} (${R(x.price)})`; }).join(' + ');
+        stage.querySelector('[data-fb]').innerHTML = `<div class="fb"><b>${ok ? 'quote correct.' : 'not quite.'}</b>${esc(lines)} = <b style="display:inline">${R(sc.total)}</b>. <span class="src">${esc(secLabel(sc.src))}</span></div>`;
+        stage.querySelectorAll('.step button').forEach(b => { b.disabled = true; });
+        btn.textContent = 'next'; btn.onclick = () => { k++; play(); };
+      });
+    };
+    play();
+  }
+
+  // ── step: panel hot seat ──
+  function stepHotseat(stage, ctx, done, itemsIn, secs) {
+    const items = itemsIn || shuffle(BANK.filter(x => x.part === ctx.part.n && x.kind === 'panel')).slice(0, 3);
+    let k = 0, r = 0;
+    const ask = () => {
+      if (k >= items.length) return done(r, items.length);
+      mcq(stage, items[k], {
+        timer: secs || 30,
+        head: `${panelSvg()}<div style="display:flex;align-items:center;gap:14px">${ringSvg()}<div style="flex:1"><div class="hud" style="margin-bottom:6px"><span>question <b>${k + 1}</b>/${items.length}</span><span>confidence</span></div><div class="meter"><i style="width:${items.length ? Math.round(r / items.length * 100) : 0}%"></i></div></div></div>
+          <p class="lab" style="margin:0">the panel asks${items[k].part && itemsIn ? ' · part ' + items[k].part : ''}</p>`,
+        onAnswer: ok => { if (ok) { const m = stage.querySelector('.meter i'); if (m) m.style.width = Math.round((r + 1) / items.length * 100) + '%'; } },
+        onDone: ok => { if (ok) r++; k++; ask(); }
+      });
+    };
+    ask();
+  }
+
+  // ── step: hand-over ──
+  function stepHand(stage, ctx, done) {
+    const it = BY_ID[`p${ctx.part.n}h`];
+    mcq(stage, it, { head: `<p class="muted" style="margin:0">Every part passes something to the next. Get the hand-over right and the 45 minutes flows.</p>`, nextLabel: 'finish', onDone: ok => done(ok ? 1 : 0, 1) });
+  }
+
+  const STEPS = { brief: stepBrief, recall: stepRecall, catch: stepCatch, sort: stepSort, match: stepMatch, order: stepOrder, quote: stepQuote, hotseat: stepHotseat, hand: stepHand };
+
+  // ── results ──
+  function confetti() {
+    const c = document.createElement('div'); c.className = 'confetti';
+    const cols = ['#E23B2E', '#16161A', '#2C3742', '#6E6C66'];
+    for (let i = 0; i < 36; i++) { const d = document.createElement('i'); d.style.left = rand(100) + '%'; d.style.background = cols[i % 4]; d.style.animationDelay = (Math.random() * 0.6) + 's'; c.appendChild(d); }
+    document.body.appendChild(c); setTimeout(() => c.remove(), 2600);
+  }
+  function result(o) {
+    const main = screen(`
+      <div><p class="lab">mission complete</p><h1>${esc(o.title)}</h1></div>
+      <div class="card" style="text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center">
+        <span class="dot"></span><div class="big">${Math.round(o.pct * 100)}%</div><div class="bigstars">${starStr(o.stars)}</div>
+        <p class="muted" style="margin:0">${o.stars === 3 ? 'Presentation ready.' : o.stars === 2 ? 'Nearly there. One more run.' : 'Good start. Play again: retrieval is how it sticks.'}</p>
+      </div>
+      ${o.handover ? `<div class="card"><p class="lab">the hand-over</p><p style="margin:0;font-weight:600">${esc(o.handover)}</p></div>` : ''}
+      <div class="spacer"></div>
+      <div class="row"><button class="btn ghost" data-a>play again</button>${o.next ? `<button class="btn" data-n>${esc(o.nextLabel)}</button>` : ''}</div>
+      <button class="btn ghost" data-h>home</button>`, { back: home, backLabel: 'home' });
+    if (o.stars === 3) confetti();
+    on(main, '[data-a]', o.again); on(main, '[data-n]', o.next); on(main, '[data-h]', home);
+  }
+
+  // ── section test ──
+  function sectionSetup(n) {
+    let part = n, picked = new Set();
+    const draw = () => {
+      const pool = BANK.filter(x => x.part === part);
+      const chips = [...new Set(pool.map(x => chipOf(x.src)))].sort((a, b) => a === 'flow' ? 1 : b === 'flow' ? -1 : a.localeCompare(b, 'en', { numeric: true }));
+      const sel = pool.filter(x => !picked.size || picked.has(chipOf(x.src)));
+      const main = screen(`
+        <div><p class="lab">section test</p><h1>test one part</h1></div>
+        <div><p class="lab">part</p><div class="chips">${D.parts.map(p => `<button class="chip ${p.n === part ? 'on' : ''}" data-p="${p.n}">${p.n}</button>`).join('')}</div></div>
+        <div class="card"><p class="lab">part ${part} · ${esc(PART[part].presenter)}</p><h2>${esc(PART[part].title)}</h2></div>
+        <div><p class="lab">narrow to sub-sections (optional)</p><div class="chips"><button class="chip ${picked.size ? '' : 'on'}" data-all>all</button>${chips.map(c => `<button class="chip ${picked.has(c) ? 'on' : ''}" data-c="${c}">${c === 'flow' ? '' : c + ' '}${esc(LABELS[c] || '')}</button>`).join('')}</div></div>
+        <div class="spacer"></div>
+        <button class="btn" data-go>start · ${Math.min(10, sel.length)} questions</button>`, { back: home, backLabel: 'home' });
+      on(main, '[data-p]', el => { part = +el.dataset.p; picked = new Set(); draw(); });
+      on(main, '[data-all]', () => { picked = new Set(); draw(); });
+      on(main, '[data-c]', el => { const c = el.dataset.c; picked.has(c) ? picked.delete(c) : picked.add(c); draw(); });
+      on(main, '[data-go]', () => runTest({
+        title: `part ${part} test`, items: shuffle(sel).slice(0, 10),
+        onEnd: res => { S.tests['p' + part] = Math.max(S.tests['p' + part] || 0, res.pct); save(); testResult(res, { again: () => sectionSetup(part) }); }
+      }));
+    };
+    draw();
+  }
+
+  // ── full plan test (weighted by the marking sheet) ──
+  function fullSetup() {
+    let timed = false;
+    const main = screen(`
+      <div><p class="lab">full plan test</p><h1>the whole plan</h1></div>
+      <div class="card"><p style="margin:0">40 questions from all eight parts, weighted like the marking sheet: Part 7 (15%) gets the most. You see the answer after each one, and get a breakdown by part at the end.</p></div>
+      <label class="card switch"><span><b>timed</b><br><span class="muted" style="font-size:14px">20 minutes on the clock</span></span><input type="checkbox" data-t></label>
+      <div class="spacer"></div><button class="btn" data-go>start the test</button>`, { back: home, backLabel: 'home' });
+    main.querySelector('[data-t]').onchange = e => { timed = e.target.checked; };
+    on(main, '[data-go]', () => {
+      const W = D.weights, sum = W.reduce((a, b) => a + b, 0), raw = W.map(w => 40 * w / sum);
+      const alloc = raw.map(Math.floor); let left = 40 - alloc.reduce((a, b) => a + b, 0);
+      raw.map((x, i) => [x - Math.floor(x), W[i], i]).sort((a, b) => b[0] - a[0] || b[1] - a[1]).slice(0, left).forEach(([, , i]) => alloc[i]++);
+      let items = [];
+      D.parts.forEach((p, i) => { items = items.concat(shuffle(BANK.filter(x => x.part === p.n)).slice(0, alloc[i])); });
+      runTest({ title: 'full plan test', items: shuffle(items), timer: timed ? 20 * 60 : 0, onEnd: res => { S.tests.full = Math.max(S.tests.full || 0, res.pct); save(); testResult(res, { again: fullSetup, byPart: true }); } });
+    });
+  }
+
+  function runTest(cfg) {
+    const items = cfg.items, ans = []; let k = 0, endAt = cfg.timer ? Date.now() + cfg.timer * 1000 : 0, iv = 0;
+    const finish = () => {
+      clearInterval(iv);
+      const right = ans.filter(a => a.ok).length;
+      cfg.onEnd({ title: cfg.title, items, ans, right, total: items.length, pct: items.length ? Math.round(right / items.length * 100) : 0 });
+    };
+    const ask = () => {
+      if (k >= items.length) return finish();
+      const main = screen(`<div class="prog">${items.map((_, i) => `<i class="${i < k ? 'on' : i === k ? 'cur' : ''}"></i>`).join('')}</div>
+        <div class="hud"><span>${esc(cfg.title)} · <b>${k + 1}</b>/${items.length}</span><span>${endAt ? '<b data-clock></b>' : `part ${items[k].part}`}</span></div>
+        <div data-stage style="display:flex;flex-direction:column;gap:14px"></div>`, { back: () => confirmLeave(home) });
+      if (endAt) {
+        const clk = () => { const s = Math.max(0, Math.round((endAt - Date.now()) / 1000)); const c = main.querySelector('[data-clock]'); if (c) c.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; if (s <= 0) { items.length = ans.length; finish(); } };
+        clearInterval(iv); clk(); iv = setInterval(clk, 1000); onLeave(() => clearInterval(iv));
+      }
+      mcq(main.querySelector('[data-stage]'), items[k], { onDone: ok => { k++; ask(); }, onAnswer: ok => ans.push({ item: items[k], ok }), nextLabel: k === items.length - 1 ? 'see results' : 'next' });
+    };
+    ask();
+  }
+
+  function testResult(res, o) {
+    const misses = res.ans.filter(a => !a.ok);
+    let bars = '', weakest = null;
+    if (o.byPart) {
+      const by = D.parts.map(p => { const a = res.ans.filter(x => x.item.part === p.n); return { n: p.n, t: a.length, r: a.filter(x => x.ok).length }; });
+      bars = `<div class="card" style="display:flex;flex-direction:column;gap:10px"><p class="lab" style="margin:0">by part</p>${by.map(b => `<div class="bar"><span>part ${b.n}</span><span class="tr"><i style="width:${b.t ? Math.round(b.r / b.t * 100) : 0}%"></i></span><span>${b.r}/${b.t}</span></div>`).join('')}</div>`;
+      const cand = by.filter(b => b.t).sort((a, b) => a.r / a.t - b.r / b.t || D.weights[b.n - 1] - D.weights[a.n - 1]);
+      if (cand.length && cand[0].r < cand[0].t) weakest = cand[0].n;
+    }
+    const st = starsFor(res.pct / 100);
+    const main = screen(`
+      <div><p class="lab">${esc(res.title)}</p><h1>your result</h1></div>
+      <div class="card" style="text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center"><span class="dot"></span><div class="big">${res.pct}%</div><div class="muted">${res.right} of ${res.total} right</div>${starStr(st)}</div>
+      ${bars}
+      ${weakest ? `<button class="btn" data-w>practise part ${weakest}: ${esc(PART[weakest].title)}</button>` : ''}
+      ${misses.length ? `<div class="card"><p class="lab">fix these (added to your review pile)</p>${misses.map(m => `<div class="miss"><b>${esc(m.item.q)}</b><br>${esc(m.item.a[m.item.c])}<br><span class="src">${esc(secLabel(m.item.src))}</span></div>`).join('')}</div>` : '<div class="card"><b>A clean sheet.</b></div>'}
+      <div class="row"><button class="btn ghost" data-a>retake</button><button class="btn" data-h>home</button></div>`, { back: home, backLabel: 'home' });
+    if (res.pct >= 90) confetti();
+    on(main, '[data-w]', () => sectionSetup(weakest)); on(main, '[data-a]', o.again); on(main, '[data-h]', home);
+  }
+
+  // ── review pile ──
+  function review() {
+    const ids = Object.keys(S.review).filter(id => BY_ID[id]);
+    if (!ids.length) {
+      const main = screen(`<div><p class="lab">review pile</p><h1>nothing to fix</h1></div><div class="card"><p style="margin:0">Anything you miss in a mission or test lands here. Get it right twice and it leaves the pile.</p></div><div class="spacer"></div><button class="btn" data-h>home</button>`, { back: home, backLabel: 'home' });
+      return on(main, '[data-h]', home);
+    }
+    runTest({ title: 'review pile', items: shuffle(ids).slice(0, 10).map(id => BY_ID[id]), onEnd: res => testResult(res, { again: review }) });
+  }
+
+  // ── final round: the 45 minutes ──
+  function final() {
+    const order = { type: 'order', title: 'the running order', hint: 'Tap the eight parts in presenting order.', items: D.parts.map(p => `Part ${p.n} · ${p.title}`), notes: D.parts.map(p => `${p.presenter} · ${p.minutes} min. ${p.handover}`), src: 'flow' };
+    const lede = { type: 'match', title: 'match the opening lines', mode: 'lede', src: 'flow' };
+    const gaunt = shuffle(BANK.filter(x => x.kind === 'panel')).slice(0, 15);
+    STEPS.gauntlet = (stage, ctx, done) => stepHotseat(stage, ctx, done, gaunt, 25);
+    runSteps({
+      title: 'the 45 minutes', part: { n: 0 },
+      steps: [{ t: 'order', g: order }, { t: 'match', g: lede }, { t: 'gauntlet', g: { title: 'panel gauntlet' } }],
+      onEnd: (r, t) => {
+        const pct = t ? r / t : 0, st = starsFor(pct);
+        S.stars.final = Math.max(S.stars.final || 0, st); save();
+        result({ title: 'the 45 minutes', pct, stars: st, again: final, handover: 'Opening 2 minutes, eight parts, close 2 minutes: 45 minutes, then 30 minutes of panel questions.' });
+      }
+    });
+  }
+
+  home();
+})();
+
+</script>
+</body>
+</html>
